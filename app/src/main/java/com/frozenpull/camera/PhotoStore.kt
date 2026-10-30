@@ -40,10 +40,10 @@ class PhotoStore(private val context: Context) {
     }
 
     fun saveReference(spot: Spot, thumb: Thumb, ghost: Bitmap?) {
-        File(refDir, "${spot.key}.luma").writeBytes(thumb.toBytes())
+        File(refDir, "${spot.refKey}.luma").writeBytes(thumb.toBytes())
         ghost?.let { bmp ->
             val scaled = Bitmap.createScaledBitmap(bmp, 640, (640f * bmp.height / bmp.width).toInt(), true)
-            File(refDir, "${spot.key}.jpg").outputStream().use { scaled.compress(Bitmap.CompressFormat.JPEG, 70, it) }
+            File(refDir, "${spot.refKey}.jpg").outputStream().use { scaled.compress(Bitmap.CompressFormat.JPEG, 70, it) }
         }
     }
 
@@ -52,7 +52,7 @@ class PhotoStore(private val context: Context) {
         /** The route spot this photo belongs to, from its file name (e.g. lt-03.jpg). */
         val spot: Spot? get() {
             val m = Regex("^([a-z]{2})-(\\d+)").find(name) ?: return null
-            val section = Route.sections.find { it.id == m.groupValues[1] } ?: return null
+            val section = Route.all.find { it.id == m.groupValues[1] } ?: return null
             return Spot(section, (m.groupValues[2].toIntOrNull() ?: return null) - 1)
         }
     }
@@ -76,7 +76,7 @@ class PhotoStore(private val context: Context) {
                 out.add(Shot(uri, c.getString(2) ?: "", date))
             }
         }
-        val order = Route.sections.map { it.id }
+        val order = Route.all.map { it.id }
         return out.sortedWith(compareBy({ order.indexOf(it.spot?.section?.id) }, { it.spot?.step ?: 99 }, { it.name }))
     }
 
@@ -128,8 +128,8 @@ class PhotoStore(private val context: Context) {
         folder?.let { Regex("WalkIn/(\\d{4}-\\d{2}-\\d{2})").find(it)?.groupValues?.get(1) }
 
     fun referenceThumb(spot: Spot): Thumb? =
-        File(refDir, "${spot.key}.luma").takeIf { it.exists() }?.let { Thumb.fromBytes(it.readBytes()) }
+        File(refDir, "${spot.refKey}.luma").takeIf { it.exists() }?.let { Thumb.fromBytes(it.readBytes()) }
 
     fun referenceGhost(spot: Spot): Bitmap? =
-        File(refDir, "${spot.key}.jpg").takeIf { it.exists() }?.let { BitmapFactory.decodeFile(it.path) }
+        File(refDir, "${spot.refKey}.jpg").takeIf { it.exists() }?.let { BitmapFactory.decodeFile(it.path) }
 }

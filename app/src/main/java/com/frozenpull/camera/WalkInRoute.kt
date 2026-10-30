@@ -15,6 +15,7 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -98,6 +99,8 @@ private class SweepTracker {
 object RouteState {
     val spot = mutableStateOf<Spot?>(Route.first())
     val auto = mutableStateOf(true)
+    /** True when the last route finished was the quick wall check (not the full morning route). */
+    val checkDone = mutableStateOf(false)
 }
 
 @Composable
@@ -107,7 +110,8 @@ fun WalkInSection(onExit: () -> Unit, onRead: (List<Uri>, List<String>) -> Unit)
     var screen by remember { mutableStateOf("camera") }
     // Reads a day's route photos in the scanner, in route order.
     val readDay: (String) -> Unit = { date ->
-        val shots = store.shots(date)
+        // Wide shots and wall checks are for What's left? on the pull list page, not for reading labels.
+        val shots = store.shots(date).filter { it.spot?.isWide != true }
         if (shots.isNotEmpty()) onRead(shots.map { it.uri }, shots.map { it.spot?.label ?: it.name })
     }
     if (screen == "camera") {
@@ -252,6 +256,7 @@ private fun GuidedCapture(
                         return
                     }
                     val next = Route.next(s)
+                    if (next == null) RouteState.checkDone.value = s.section.id.startsWith("c")
                     if (next != null && next.section == s.section) {
                         prevThumb = thumbAtShot; prevGhost = ghostAtShot
                     } else {
@@ -333,9 +338,16 @@ private fun GuidedCapture(
                 .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(10.dp)).padding(12.dp)
         ) {
             val s = spot
-            if (s == null) {
+            if (s == null && RouteState.checkDone.value) {
+                Text("Walls checked", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text("On the pull list page, tap What's left? and add the check photos from the gallery folder WalkIn › ${LocalDate.now()} (files cl = left shelf, cb = back wall, cr = right shelf, cf = front wall).", color = Color.White)
+                Spacer(Modifier.height(10.dp))
+                Button(onClick = { openPullList(ctx) }) { Text("Open pull list") }
+                Spacer(Modifier.height(6.dp))
+                OutlinedButton(onClick = { spot = Route.checkFirst(); prevThumb = null; prevGhost = null }) { Text("Check the walls again", color = Color.White) }
+            } else if (s == null) {
                 Text("Route done", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text("Read today's photos here to see what's in back stock, or add them to the pull list page (gallery folder WalkIn › ${LocalDate.now()}).", color = Color.White)
+                Text("Add today's photos to the pull list page with Update walk-in (gallery folder WalkIn › ${LocalDate.now()}): the w files are the wide shots, the rest go section by section. Or read them here.", color = Color.White)
                 Spacer(Modifier.height(10.dp))
                 Button(onClick = onReadToday) { Text("Read today's photos") }
                 Spacer(Modifier.height(6.dp))
@@ -367,11 +379,19 @@ private fun GuidedCapture(
             Modifier.align(Alignment.CenterEnd).padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()),
+                horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 OutlinedButton(onClick = onExit) { Text("‹ Scanner", color = Color.White) }
                 OutlinedButton(onClick = onReadToday) { Text("Read photos", color = Color.White) }
                 OutlinedButton(onClick = onOpenPhotos) { Text("Photos", color = Color.White) }
                 OutlinedButton(onClick = { openPullList(ctx) }) { Text("Pull list", color = Color.White) }
+                OutlinedButton(onClick = {
+                    sweeping = false; RouteState.checkDone.value = false
+                    spot = Route.checkFirst(); prevThumb = null; prevGhost = null
+                    lastSaved = "Quick check: one wide shot per wall"
+                }) { Text("Check walls", color = Color.White) }
                 OutlinedButton(onClick = { askReset = true }) { Text("Reset", color = Color.White) }
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
