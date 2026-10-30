@@ -60,6 +60,8 @@ object Holder {
     fun get(ctx: Context): AppState = state ?: AppState(ctx).also { state = it }
 }
 
+const val APP_VERSION = "0.4"
+
 val Sure = Color(0xFF2ECC71)
 val Maybe = Color(0xFFF5B041)
 val Unread = Color(0xFFB0BEC5)
@@ -234,13 +236,17 @@ fun CameraScreen(
                 modifier = Modifier.size(90.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Sure, contentColor = Color.Black),
             ) { Text(if (shooting) "…" else "Scan", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
+            Button(
+                onClick = onRoute, enabled = !busy, modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Maybe, contentColor = Color.Black),
+            ) { Text("Walk-in route", fontWeight = FontWeight.Bold) }
             OutlinedButton(onClick = onGallery, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text("Scan photos", color = Color.White) }
-            OutlinedButton(onClick = onRoute, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text("Walk-in route", color = Color.White) }
             OutlinedButton(onClick = onFound, modifier = Modifier.fillMaxWidth()) { Text("Found (${state.found.items.size})", color = Color.White) }
             if (state.photos.isNotEmpty()) {
                 OutlinedButton(onClick = onResults, modifier = Modifier.fillMaxWidth()) { Text("Last results", color = Color.White) }
             }
             TextButton(onClick = { torch = !torch }) { Text(if (torch) "Light: on" else "Light: off", color = Color.White) }
+            Text("version $APP_VERSION", color = Color.White.copy(alpha = 0.4f), fontSize = 11.sp)
         }
     }
 }
