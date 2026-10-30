@@ -23,6 +23,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -94,7 +95,7 @@ private fun CameraPermissionGate(content: @Composable () -> Unit) {
     }
 }
 
-enum class Screen { CAMERA, RESULTS, FOUND }
+enum class Screen { CAMERA, RESULTS, FOUND, ROUTE }
 
 @Composable
 fun AppRoot(state: AppState) {
@@ -131,6 +132,7 @@ fun AppRoot(state: AppState) {
                 onCaptured = { uri -> scanAll(listOf(uri)) { "Camera scan" } },
                 onGallery = openGallery,
                 onFound = { screen = Screen.FOUND },
+                onRoute = { screen = Screen.ROUTE },
                 onResults = { photoIndex = state.photos.lastIndex; screen = Screen.RESULTS },
             )
             Screen.RESULTS -> ResultsScreen(
@@ -140,6 +142,10 @@ fun AppRoot(state: AppState) {
                 onFound = { screen = Screen.FOUND },
             )
             Screen.FOUND -> FoundScreen(state, onBack = { screen = Screen.CAMERA })
+            Screen.ROUTE -> com.frozenpull.camera.WalkInSection(
+                onExit = { screen = Screen.CAMERA },
+                onRead = { uris, labels -> scanAll(uris) { labels.getOrElse(it) { "Walk-in photo" } } },
+            )
         }
         progress?.let { msg ->
             Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.6f)), contentAlignment = Alignment.Center) {
@@ -160,6 +166,7 @@ fun CameraScreen(
     onCaptured: (Uri) -> Unit,
     onGallery: () -> Unit,
     onFound: () -> Unit,
+    onRoute: () -> Unit,
     onResults: () -> Unit,
 ) {
     val ctx = LocalContext.current
@@ -218,15 +225,17 @@ fun CameraScreen(
             )
         }
         Column(
-            Modifier.width(170.dp).fillMaxHeight().background(Panel).padding(12.dp),
+            Modifier.width(170.dp).fillMaxHeight().background(Panel)
+                .verticalScroll(androidx.compose.foundation.rememberScrollState()).padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         ) {
             Button(
                 onClick = { shoot() }, enabled = !shooting && !busy, shape = CircleShape,
-                modifier = Modifier.size(104.dp),
+                modifier = Modifier.size(90.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Sure, contentColor = Color.Black),
             ) { Text(if (shooting) "…" else "Scan", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
             OutlinedButton(onClick = onGallery, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text("Scan photos", color = Color.White) }
+            OutlinedButton(onClick = onRoute, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text("Walk-in route", color = Color.White) }
             OutlinedButton(onClick = onFound, modifier = Modifier.fillMaxWidth()) { Text("Found (${state.found.items.size})", color = Color.White) }
             if (state.photos.isNotEmpty()) {
                 OutlinedButton(onClick = onResults, modifier = Modifier.fillMaxWidth()) { Text("Last results", color = Color.White) }

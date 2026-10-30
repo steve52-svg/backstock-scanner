@@ -70,6 +70,7 @@ fun ResultsScreen(state: AppState, index: Int, onIndex: (Int) -> Unit, onBack: (
                 Text("${index + 1}/${state.photos.size}", color = Color.White)
                 TextButton(onClick = { onIndex(index + 1) }, enabled = index < state.photos.lastIndex) { Text("›") }
             }
+            Text(photo.label, color = Color.White.copy(alpha = 0.7f), fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             val sure = photo.detections.count { it.confirmed || it.level == Level.SURE }
             val guess = photo.detections.count { !it.confirmed && it.level == Level.GUESS }
             val unread = photo.detections.count { !it.confirmed && it.level == Level.UNKNOWN }
