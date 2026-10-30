@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
         val state = Holder.get(applicationContext)
         takeSharedList(intent)
         setContent {
-            MaterialTheme(colorScheme = darkColorScheme(primary = Color(0xFF2ECC71), secondary = Color(0xFFF5B041))) {
+            PullListTheme {
                 CameraPermissionGate { AppRoot(state) }
             }
         }
@@ -93,13 +93,17 @@ object Holder {
     fun get(ctx: Context): AppState = state ?: AppState(ctx).also { state = it }
 }
 
-const val APP_VERSION = "1.0"
+const val APP_VERSION = "1.1"
 
 val Sure = Color(0xFF2ECC71)
 val Maybe = Color(0xFFF5B041)
 val Unread = Color(0xFFB0BEC5)
-val Bg = Color(0xFF111417)
-val Panel = Color(0xFF1C2126)
+val Bg: Color @Composable get() = T.bg
+val Panel: Color @Composable get() = T.surface
+/** Main text color (the page's --fg). */
+val Ink: Color @Composable get() = T.fg
+/** Secondary text (the page's --muted). */
+val Muted: Color @Composable get() = T.muted
 
 fun levelColor(d: Detection) = when {
     d.confirmed || d.level == Level.SURE -> Sure
@@ -124,7 +128,7 @@ private fun CameraPermissionGate(content: @Composable () -> Unit) {
         Modifier.fillMaxSize().background(Bg).padding(24.dp),
         verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Back Stock Scanner needs the camera to read box labels.", color = Color.White, fontSize = 18.sp)
+        Text("Back Stock Scanner needs the camera to read box labels.", color = Ink, fontSize = 18.sp)
         Spacer(Modifier.height(16.dp))
         Button(onClick = { ask.launch(Manifest.permission.CAMERA) }) { Text("Allow camera") }
     }
@@ -282,26 +286,19 @@ fun CameraScreen(
                 .verticalScroll(androidx.compose.foundation.rememberScrollState()).padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         ) {
+            Text("BACK STOCK", style = Type.title.copy(fontSize = 22.sp), color = Ink)
             Button(
                 onClick = { shoot() }, enabled = !shooting && !busy, shape = CircleShape,
-                modifier = Modifier.size(90.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Sure, contentColor = Color.Black),
-            ) { Text(if (shooting) "…" else "Scan", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
-            Button(
-                onClick = onRoute, enabled = !busy, modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Maybe, contentColor = Color.Black),
-            ) { Text("Walk-in route", fontWeight = FontWeight.Bold) }
-            Button(
-                onClick = onHandsFree, enabled = !busy, modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4FC0CC), contentColor = Color.Black),
-            ) { Text("Pull list", fontWeight = FontWeight.Bold) }
-            OutlinedButton(onClick = onGallery, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text("Scan photos", color = Color.White) }
-            OutlinedButton(onClick = onFound, modifier = Modifier.fillMaxWidth()) { Text("Found (${state.found.items.size})", color = Color.White) }
-            if (state.photos.isNotEmpty()) {
-                OutlinedButton(onClick = onResults, modifier = Modifier.fillMaxWidth()) { Text("Last results", color = Color.White) }
-            }
-            TextButton(onClick = { torch = !torch }) { Text(if (torch) "Light: on" else "Light: off", color = Color.White) }
-            Text("version $APP_VERSION", color = Color.White.copy(alpha = 0.4f), fontSize = 11.sp)
+                modifier = Modifier.size(84.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = T.accent, contentColor = T.bg),
+            ) { Text(if (shooting) "…" else "Scan", style = Type.title.copy(fontSize = 22.sp)) }
+            PageButton("Pull list", onHandsFree, kind = Btn.ACCENT, enabled = !busy, modifier = Modifier.fillMaxWidth())
+            PageButton("Walk-in route", onRoute, kind = Btn.ACCENT, enabled = !busy, modifier = Modifier.fillMaxWidth())
+            PageButton("Scan photos", onGallery, enabled = !busy, modifier = Modifier.fillMaxWidth())
+            PageButton("Found (${state.found.items.size})", onFound, modifier = Modifier.fillMaxWidth())
+            if (state.photos.isNotEmpty()) PageButton("Last results", onResults, modifier = Modifier.fillMaxWidth())
+            PageButton(if (torch) "Light: on" else "Light: off", { torch = !torch }, modifier = Modifier.fillMaxWidth())
+            Text("version $APP_VERSION", style = Type.small, color = Muted)
         }
     }
 }

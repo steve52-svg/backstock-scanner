@@ -24,6 +24,15 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.7"
+      - name: Fetch fonts (same as the pull list page; SIL Open Font License)
+        run: |
+          mkdir -p app/src/main/res/font
+          base=https://raw.githubusercontent.com/google/fonts/main/ofl
+          curl -fsSL "$base/barlowcondensed/BarlowCondensed-SemiBold.ttf" -o app/src/main/res/font/barlow_condensed_semibold.ttf
+          curl -fsSL "$base/barlowcondensed/BarlowCondensed-Bold.ttf" -o app/src/main/res/font/barlow_condensed_bold.ttf
+          curl -fsSL "$base/atkinsonhyperlegible/AtkinsonHyperlegible-Regular.ttf" -o app/src/main/res/font/atkinson_regular.ttf
+          curl -fsSL "$base/atkinsonhyperlegible/AtkinsonHyperlegible-Bold.ttf" -o app/src/main/res/font/atkinson_bold.ttf
+          ls -la app/src/main/res/font
       - name: Build debug APK
         run: |
           set -o pipefail

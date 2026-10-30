@@ -64,23 +64,23 @@ fun ResultsScreen(state: AppState, index: Int, onIndex: (Int) -> Unit, onBack: (
         }
         Column(Modifier.width(320.dp).fillMaxHeight().background(Panel).padding(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onBack) { Text("‹ Camera", color = Color.White) }
+                TextButton(onClick = onBack) { Text("‹ Camera", color = Ink) }
                 Spacer(Modifier.weight(1f))
                 TextButton(onClick = { onIndex(index - 1) }, enabled = index > 0) { Text("‹") }
-                Text("${index + 1}/${state.photos.size}", color = Color.White)
+                Text("${index + 1}/${state.photos.size}", color = Ink)
                 TextButton(onClick = { onIndex(index + 1) }, enabled = index < state.photos.lastIndex) { Text("›") }
             }
-            Text(photo.label, color = Color.White.copy(alpha = 0.7f), fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(photo.label, color = Muted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             val sure = photo.detections.count { it.confirmed || it.level == Level.SURE }
             val guess = photo.detections.count { !it.confirmed && it.level == Level.GUESS }
             val unread = photo.detections.count { !it.confirmed && it.level == Level.UNKNOWN }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Dot(Sure); Text("$sure sure", color = Color.White, fontSize = 13.sp)
-                Dot(Maybe); Text("$guess guesses", color = Color.White, fontSize = 13.sp)
-                Dot(Unread); Text("$unread unread", color = Color.White, fontSize = 13.sp)
+                Dot(Sure); Text("$sure sure", color = Ink, fontSize = 13.sp)
+                Dot(Maybe); Text("$guess guesses", color = Ink, fontSize = 13.sp)
+                Dot(Unread); Text("$unread unread", color = Ink, fontSize = 13.sp)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Show unread text", color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp)
+                Text("Show unread text", color = Muted, fontSize = 13.sp)
                 Spacer(Modifier.weight(1f))
                 Switch(checked = showUnread, onCheckedChange = { showUnread = it })
             }
@@ -89,14 +89,14 @@ fun ResultsScreen(state: AppState, index: Int, onIndex: (Int) -> Unit, onBack: (
                 lastHidden?.let { h ->
                     TextButton(onClick = {
                         scope.launch { state.unignore(photo, h); lastHidden = null; note = "Put back \"${h.text.take(30)}\"" }
-                    }) { Text("Undo", color = Maybe) }
+                    }) { Text("Undo", color = T.skip) }
                 }
             }
-            Text("Tap a label to fix it or teach it.", color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp)
+            Text("Tap a label to fix it or teach it.", color = Muted, fontSize = 12.sp)
             LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 items(dets, key = { it.id }) { d ->
                     Row(
-                        Modifier.fillMaxWidth().clip(RoundedCornerShape(6.dp)).background(Color.White.copy(alpha = 0.05f))
+                        Modifier.fillMaxWidth().clip(RoundedCornerShape(6.dp)).background(Bg)
                             .clickable { open = d }.padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -105,11 +105,11 @@ fun ResultsScreen(state: AppState, index: Int, onIndex: (Int) -> Unit, onBack: (
                         Column(Modifier.weight(1f)) {
                             Text(
                                 d.product?.name ?: if (d.isBarcode) "Unknown barcode" else "Can't place this",
-                                color = Color.White, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                                color = Ink, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis,
                             )
                             Text(
                                 (if (d.isBarcode) "barcode " else "read: ") + d.text + (if (d.confirmed) "  ✓" else ""),
-                                color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                                color = Muted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
                             )
                         }
                         if (!d.confirmed) NotRelevantButton(small = true) { notRelevant(d) }
@@ -213,7 +213,7 @@ fun DetectionSheet(
         }
     }
 
-    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.85f)).pointerInput(Unit) { detectTapGestures { } }) {
+    Box(Modifier.fillMaxSize().background(Bg).pointerInput(Unit) { detectTapGestures { } }) {
         Row(Modifier.fillMaxSize().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(Modifier.weight(1f).fillMaxHeight()) {
                 Box(Modifier.weight(1f).fillMaxWidth().border(2.dp, levelColor(det), RoundedCornerShape(8.dp)).padding(4.dp), contentAlignment = Alignment.Center) {
@@ -221,7 +221,7 @@ fun DetectionSheet(
                         ?: CircularProgressIndicator()
                 }
                 Spacer(Modifier.height(8.dp))
-                Text(if (det.isBarcode) "Barcode: ${det.text}" else "The phone read: \"${det.text}\"", color = Color.White, fontSize = 16.sp)
+                Text(if (det.isBarcode) "Barcode: ${det.text}" else "The phone read: \"${det.text}\"", color = Ink, fontSize = 16.sp)
                 det.product?.let {
                     Text(
                         "It thinks: ${it.name}" + (det.guesses.firstOrNull()?.let { g -> "  (${(g.score * 100).toInt()}%, ${g.why})" } ?: ""),
@@ -231,16 +231,16 @@ fun DetectionSheet(
             }
             Column(Modifier.width(360.dp).fillMaxHeight().background(Panel, RoundedCornerShape(10.dp)).padding(10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("What is this?", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text("What is this?", color = Ink, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.weight(1f))
                     NotRelevantButton { if (!working) onNotRelevant() }
-                    TextButton(onClick = onClose) { Text("Close", color = Color.White) }
+                    TextButton(onClick = onClose) { Text("Close", color = Ink) }
                 }
                 if (query.isBlank()) {
                     det.guesses.take(5).forEach { g ->
                         OutlinedButton(onClick = { choose(g.product) }, enabled = !working, modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
-                            Text(g.product.name, color = Color.White, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            Text("${(g.score * 100).toInt()}%", color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp)
+                            Text(g.product.name, color = Ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text("${(g.score * 100).toInt()}%", color = Muted, fontSize = 12.sp)
                         }
                     }
                 }
@@ -252,19 +252,19 @@ fun DetectionSheet(
                 LazyColumn(Modifier.weight(1f)) {
                     items(results, key = { it.id }) { p ->
                         Column(Modifier.fillMaxWidth().clickable(enabled = !working) { choose(p) }.padding(vertical = 8.dp, horizontal = 4.dp)) {
-                            Text(p.name, color = Color.White)
-                            if (p.place.isNotBlank()) Text(p.place, color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp)
+                            Text(p.name, color = Ink)
+                            if (p.place.isNotBlank()) Text(p.place, color = Muted, fontSize = 12.sp)
                         }
                     }
                     if (query.isNotBlank()) item {
                         TextButton(onClick = { choose(state.addProduct(query)) }, enabled = !working) {
-                            Text("+ Add new product \"${query.trim()}\"", color = Maybe)
+                            Text("+ Add new product \"${query.trim()}\"", color = T.accent)
                         }
                     }
                 }
                 if (!det.isBarcode) Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = handwritten, onCheckedChange = { handwritten = it })
-                    Text("Handwritten — save it for training", color = Color.White, fontSize = 13.sp)
+                    Text("Handwritten — save it for training", color = Ink, fontSize = 13.sp)
                 }
             }
         }
@@ -283,12 +283,12 @@ fun FoundScreen(state: AppState, onBack: () -> Unit) {
     Row(Modifier.fillMaxSize().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Column(Modifier.weight(1f).fillMaxHeight()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onBack) { Text("‹ Camera", color = Color.White) }
-                Text("Found in back stock · ${list.size} products", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                TextButton(onClick = onBack) { Text("‹ Camera", color = Ink) }
+                Text("Found in back stock · ${list.size} products", color = Ink, fontSize = 20.sp, fontWeight = FontWeight.Bold)
             }
             if (list.isEmpty()) Text(
                 "Nothing yet. Scan some boxes — green labels land here automatically; yellow ones once you confirm them.",
-                color = Color.White.copy(alpha = 0.6f), modifier = Modifier.padding(16.dp),
+                color = Muted, modifier = Modifier.padding(16.dp),
             )
             LazyColumn(Modifier.weight(1f)) {
                 var last = "?"
@@ -301,9 +301,9 @@ fun FoundScreen(state: AppState, onBack: () -> Unit) {
                     item(key = p.id) {
                         Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
-                                Text(p.name, color = Color.White)
+                                Text(p.name, color = Ink)
                                 Text(listOf(p.row.takeIf { it.isNotBlank() }?.let { "$it row" }, if (n > 1) "in $n photos" else null)
-                                    .filterNotNull().joinToString(" · "), color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp)
+                                    .filterNotNull().joinToString(" · "), color = Muted, fontSize = 12.sp)
                             }
                             TextButton(onClick = { state.found.drop(p.id) }) { Text("Remove", color = Color(0xFFFF8A80)) }
                         }
@@ -313,21 +313,21 @@ fun FoundScreen(state: AppState, onBack: () -> Unit) {
         }
         Column(Modifier.width(280.dp).fillMaxHeight().background(Panel, RoundedCornerShape(10.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = { share(ctx, "Back stock found", state.foundText()) }, enabled = list.isNotEmpty(), modifier = Modifier.fillMaxWidth()) { Text("Share list") }
-            OutlinedButton(onClick = { confirmClear = true }, enabled = list.isNotEmpty(), modifier = Modifier.fillMaxWidth()) { Text("Clear list", color = Color.White) }
-            Divider(color = Color.White.copy(alpha = 0.15f))
-            Text("What it has learned", color = Color.White, fontWeight = FontWeight.Bold)
+            OutlinedButton(onClick = { confirmClear = true }, enabled = list.isNotEmpty(), modifier = Modifier.fillMaxWidth()) { Text("Clear list", color = Ink) }
+            Divider(color = Muted)
+            Text("What it has learned", color = Ink, fontWeight = FontWeight.Bold)
             Text(
                 "${state.learned.writings.size} handwritten names\n${state.learned.codes.size} barcodes\n" +
                     "${state.learned.ignored.size} labels marked not relevant\n${state.trainingCount} label pictures saved for training",
-                color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp,
+                color = Muted, fontSize = 13.sp,
             )
             OutlinedButton(onClick = { share(ctx, "Back Stock Scanner learned data", state.learnedJson()) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Share learned data", color = Color.White)
+                Text("Share learned data", color = Ink)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Careful reading", color = Color.White)
-                    Text("Reads each photo in quarters too. Catches smaller writing; a few seconds slower.", color = Color.White.copy(alpha = 0.5f), fontSize = 11.sp)
+                    Text("Careful reading", color = Ink)
+                    Text("Reads each photo in quarters too. Catches smaller writing; a few seconds slower.", color = Muted, fontSize = 11.sp)
                 }
                 Switch(checked = state.careful, onCheckedChange = { state.updateCareful(it) })
             }

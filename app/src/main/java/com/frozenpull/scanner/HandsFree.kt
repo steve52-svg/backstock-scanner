@@ -130,20 +130,20 @@ fun HandsFreeScreen(state: AppState, onBack: () -> Unit) {
         note = "Results copied. On the pull list page, tap Paste results from app."
     }
 
-    val green = Color(0xFF2ECC71); val red = Color(0xFFE5534B)
+    val green = T.accent; val red = T.miss
     Column(Modifier.fillMaxSize().background(Bg).padding(10.dp)) {
         // Top bar
         Row(
             Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            TextButton(onClick = onBack) { Text("‹ Scanner", color = Color.White) }
+            TextButton(onClick = onBack) { Text("‹ Scanner", color = Ink) }
             FilterChip(selected = listen, onClick = { toggleListen() }, label = { Text(if (listen) "Voice: on" else "Voice: off") })
             FilterChip(selected = talk, onClick = { talk = !talk; voice.talk = talk }, label = { Text(if (talk) "Read aloud" else "Silent") })
-            OutlinedButton(onClick = { pasteList() }) { Text("Load from page", color = Color.White) }
-            OutlinedButton(onClick = { copyResults() }, enabled = run.pulled + run.cant > 0) { Text("Copy results", color = Color.White) }
+            OutlinedButton(onClick = { pasteList() }) { Text("Load from page", color = Ink) }
+            OutlinedButton(onClick = { copyResults() }, enabled = run.pulled + run.cant > 0) { Text("Copy results", color = Ink) }
             val warn = Color(0xFFFF8A80)
-            OutlinedButton(onClick = { confirm = "restart" }, enabled = run.items.isNotEmpty()) { Text("Start over", color = Color.White) }
+            OutlinedButton(onClick = { confirm = "restart" }, enabled = run.items.isNotEmpty()) { Text("Start over", color = Ink) }
             OutlinedButton(onClick = {
                 // Cancel all: stop reading and listening right now and leave hands-free. The list and marks are kept.
                 listen = false; voice.hush(); onBack()
@@ -152,14 +152,14 @@ fun HandsFreeScreen(state: AppState, onBack: () -> Unit) {
         }
         val line = listOf(note, if (listen) status else "").filter { it.isNotBlank() }.joinToString("  ·  ")
         Text(line.ifEmpty { "Volume down = Pulled · Volume up = Can't find · or turn on Voice and say Pulled, Can't find, Next, Back, Repeat" },
-            color = Color.White.copy(alpha = 0.65f), fontSize = 13.sp, maxLines = 2, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+            color = Muted, fontSize = 13.sp, maxLines = 2, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
 
         if (run.items.isEmpty()) {
             Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center) {
-                Text("Nothing on the pull list", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text("Nothing on the pull list", color = Ink, fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
                 Text("Mark items Need on the Pull list screen (‹ Scanner → Pull list), or on the pull list page and tap Send to app. Then come back here.",
-                    color = Color.White.copy(alpha = 0.85f), fontSize = 16.sp)
+                    color = Muted, fontSize = 16.sp)
             }
             return@Column
         }
@@ -170,19 +170,19 @@ fun HandsFreeScreen(state: AppState, onBack: () -> Unit) {
             // The current item, big enough to read at arm's length.
             Column(Modifier.weight(1f).fillMaxHeight().background(Panel, RoundedCornerShape(14.dp)).padding(18.dp)) {
                 Text("${i + 1} of ${run.items.size}  ·  ${run.left} left  ·  ${run.pulled} pulled" + if (run.cant > 0) "  ·  ${run.cant} can't find" else "",
-                    color = Color.White.copy(alpha = 0.7f), fontSize = 15.sp)
+                    color = Muted, fontSize = 15.sp)
                 Spacer(Modifier.height(10.dp))
                 if (run.left == 0) {
                     Text("All done", color = green, fontSize = 40.sp, fontWeight = FontWeight.Bold)
-                    Text("${run.pulled} pulled" + (if (run.cant > 0) ", ${run.cant} can't find" else ""), color = Color.White, fontSize = 22.sp)
+                    Text("${run.pulled} pulled" + (if (run.cant > 0) ", ${run.cant} can't find" else ""), color = Ink, fontSize = 22.sp)
                     Spacer(Modifier.height(12.dp))
                     Button(onClick = { copyResults() }) { Text("Copy results for the pull list page", fontSize = 16.sp) }
                 } else {
-                    Text(it.name, color = Color.White, fontSize = 38.sp, fontWeight = FontWeight.Bold, lineHeight = 42.sp, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                    Text(it.name, color = Ink, fontSize = 38.sp, fontWeight = FontWeight.Bold, lineHeight = 42.sp, maxLines = 3, overflow = TextOverflow.Ellipsis)
                     Spacer(Modifier.height(8.dp))
-                    if (it.detail.isNotBlank()) Text(it.detail, color = if (it.detail.contains("artial")) Maybe else Color.White, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+                    if (it.detail.isNotBlank()) Text(it.detail, color = if (it.detail.contains("artial")) T.skip else Ink, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.height(6.dp))
-                    Text(whereOf(it), color = Color.White.copy(alpha = 0.75f), fontSize = 20.sp)
+                    Text(whereOf(it), color = Muted, fontSize = 20.sp)
                     when (it.status) {
                         PullStatus.PULLED -> Text("✓ Pulled", color = green, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         PullStatus.CANT -> Text("✗ Can't find", color = red, fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -194,16 +194,16 @@ fun HandsFreeScreen(state: AppState, onBack: () -> Unit) {
             Column(Modifier.width(280.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Button(
                     onClick = { act(Cmd.PULLED) }, modifier = Modifier.fillMaxWidth().weight(1.4f), shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = green, contentColor = Color.Black), enabled = run.left > 0,
+                    colors = ButtonDefaults.buttonColors(containerColor = green, contentColor = T.bg), enabled = run.left > 0,
                 ) { Text("PULLED", fontSize = 30.sp, fontWeight = FontWeight.Black) }
                 Button(
                     onClick = { act(Cmd.CANT) }, modifier = Modifier.fillMaxWidth().weight(1f), shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = red, contentColor = Color.White), enabled = run.left > 0,
+                    colors = ButtonDefaults.buttonColors(containerColor = red, contentColor = T.bg), enabled = run.left > 0,
                 ) { Text("CAN'T FIND", fontSize = 24.sp, fontWeight = FontWeight.Black) }
                 Row(Modifier.fillMaxWidth().weight(0.7f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = { act(Cmd.BACK) }, modifier = Modifier.weight(1f).fillMaxHeight(), shape = RoundedCornerShape(12.dp)) { Text("Back", color = Color.White, fontSize = 16.sp) }
-                    OutlinedButton(onClick = { act(Cmd.REPEAT) }, modifier = Modifier.weight(1f).fillMaxHeight(), shape = RoundedCornerShape(12.dp)) { Text("Say it", color = Color.White, fontSize = 16.sp) }
-                    OutlinedButton(onClick = { act(Cmd.NEXT) }, modifier = Modifier.weight(1f).fillMaxHeight(), shape = RoundedCornerShape(12.dp)) { Text("Skip", color = Color.White, fontSize = 16.sp) }
+                    OutlinedButton(onClick = { act(Cmd.BACK) }, modifier = Modifier.weight(1f).fillMaxHeight(), shape = RoundedCornerShape(12.dp)) { Text("Back", color = Ink, fontSize = 16.sp) }
+                    OutlinedButton(onClick = { act(Cmd.REPEAT) }, modifier = Modifier.weight(1f).fillMaxHeight(), shape = RoundedCornerShape(12.dp)) { Text("Say it", color = Ink, fontSize = 16.sp) }
+                    OutlinedButton(onClick = { act(Cmd.NEXT) }, modifier = Modifier.weight(1f).fillMaxHeight(), shape = RoundedCornerShape(12.dp)) { Text("Skip", color = Ink, fontSize = 16.sp) }
                 }
             }
         }
