@@ -24,6 +24,10 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import com.frozenpull.camera.Lens
+import com.frozenpull.camera.LensPicker
+import com.frozenpull.camera.LensPlan
+import com.frozenpull.camera.Lenses
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -89,7 +93,7 @@ object Holder {
     fun get(ctx: Context): AppState = state ?: AppState(ctx).also { state = it }
 }
 
-const val APP_VERSION = "0.8"
+const val APP_VERSION = "0.9"
 
 val Sure = Color(0xFF2ECC71)
 val Maybe = Color(0xFFF5B041)
@@ -216,13 +220,23 @@ fun CameraScreen(
     var shooting by remember { mutableStateOf(false) }
     var note by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
+    // Wide / Normal / Zoom
+    var plans by remember { mutableStateOf<Map<Lens, LensPlan>>(emptyMap()) }
+    var lensPick by remember { mutableStateOf(Lens.NORMAL) }
+    val lens = if (plans.isEmpty() || lensPick in plans) lensPick else Lens.NORMAL
+
+    LaunchedEffect(lens) {
         val future = ProcessCameraProvider.getInstance(ctx)
         future.addListener({
             val provider = future.get()
+            plans = Lenses.plans(provider)
+            val plan = plans[lens] ?: plans[Lens.NORMAL] ?: LensPlan(CameraSelector.DEFAULT_BACK_CAMERA, 1f, "1×")
             val preview = Preview.Builder().build().also { it.setSurfaceProvider(previewView.surfaceProvider) }
             provider.unbindAll()
-            camera = provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture)
+            val cam = try { provider.bindToLifecycle(lifecycleOwner, plan.selector, preview, imageCapture) }
+                catch (e: Exception) { provider.unbindAll(); provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture) }
+            cam.cameraControl.setZoomRatio(plan.zoom)
+            camera = cam
         }, ContextCompat.getMainExecutor(ctx))
     }
     LaunchedEffect(torch, camera) { camera?.cameraControl?.enableTorch(torch) }
@@ -254,6 +268,7 @@ fun CameraScreen(
     Row(Modifier.fillMaxSize()) {
         Box(Modifier.weight(1f).fillMaxHeight()) {
             AndroidView({ previewView }, Modifier.fillMaxSize())
+            LensPicker(plans, lens, onPick = { lensPick = it }, modifier = Modifier.align(Alignment.BottomStart).padding(12.dp))
             Text(
                 note.ifEmpty { "Fit a few boxes in the picture, hold still, tap Scan. Or scan photos you already took." },
                 color = Color.White, fontSize = 14.sp,

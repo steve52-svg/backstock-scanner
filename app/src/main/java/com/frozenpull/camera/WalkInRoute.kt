@@ -162,8 +162,16 @@ private fun GuidedCapture(
         try { android.media.ToneGenerator(android.media.AudioManager.STREAM_NOTIFICATION, 80) } catch (e: Exception) { null }
     }
 
-    val refThumb = remember(spot) { spot?.let { store.referenceThumb(it) } }
-    val refGhost = remember(spot) { spot?.let { store.referenceGhost(it) } }
+    // Bumped when the guides are cleared, so the faded guide disappears right away.
+    var refVersion by remember { mutableIntStateOf(0) }
+    val refThumb = remember(spot, refVersion) { spot?.let { store.referenceThumb(it) } }
+    val refGhost = remember(spot, refVersion) { spot?.let { store.referenceGhost(it) } }
+
+    // Wide / Normal / Zoom. Wide shots switch to the wide lens by themselves; you can change it any time.
+    var plans by remember { mutableStateOf<Map<Lens, LensPlan>>(emptyMap()) }
+    var lensPick by remember(spot?.section) { mutableStateOf<Lens?>(null) }
+    val wanted = lensPick ?: if (spot?.isWide == true) Lens.WIDE else Lens.NORMAL
+    val lens = if (plans.isEmpty() || wanted in plans) wanted else Lens.NORMAL
 
     // Values the analyzer thread reads.
     val target = rememberUpdatedState(
@@ -190,7 +198,7 @@ private fun GuidedCapture(
     }
 
     // Camera setup: preview + still capture + a small analysis stream for line-up checks.
-    LaunchedEffect(Unit) {
+    LaunchedEffect(lens) {
         val providerFuture = ProcessCameraProvider.getInstance(ctx)
         providerFuture.addListener({
             val provider = providerFuture.get()
@@ -228,8 +236,12 @@ private fun GuidedCapture(
                     image.close()
                 }
             }
+            plans = Lenses.plans(provider)
+            val plan = plans[lens] ?: plans[Lens.NORMAL] ?: LensPlan(CameraSelector.DEFAULT_BACK_CAMERA, 1f, "1×")
             provider.unbindAll()
-            provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture, analysis)
+            val cam = try { provider.bindToLifecycle(lifecycleOwner, plan.selector, preview, imageCapture, analysis) }
+                catch (e: Exception) { provider.unbindAll(); provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture, analysis) }
+            cam.cameraControl.setZoomRatio(plan.zoom)
         }, ContextCompat.getMainExecutor(ctx))
     }
 
@@ -374,6 +386,8 @@ private fun GuidedCapture(
             if (lastSaved.isNotEmpty()) Text(lastSaved, color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp)
         }
 
+        LensPicker(plans, lens, onPick = { lensPick = it }, modifier = Modifier.align(Alignment.BottomStart).padding(16.dp))
+
         // Right side controls, in two columns so they fit on a sideways phone.
         Row(
             Modifier.align(Alignment.CenterEnd).padding(16.dp),
@@ -420,12 +434,17 @@ private fun GuidedCapture(
         }
     }
 
+    // Reset also clears the faded guides, so the next route lines up fresh.
     if (askReset) ResetDialog(
-        onKeep = { spot = Route.first(); prevThumb = null; prevGhost = null; askReset = false; lastSaved = "Route restarted" },
+        onKeep = {
+            store.clearReferences(); refVersion++; sweeping = false; RouteState.checkDone.value = false
+            spot = Route.first(); prevThumb = null; prevGhost = null; askReset = false; lastSaved = "Route restarted, guides cleared"
+        },
         onDelete = {
             val n = store.deleteDay(LocalDate.now().toString())
+            store.clearReferences(); refVersion++; sweeping = false; RouteState.checkDone.value = false
             spot = Route.first(); prevThumb = null; prevGhost = null; askReset = false
-            lastSaved = "Deleted $n photos. Route restarted."
+            lastSaved = "Deleted $n photos and the guides. Route restarted."
         },
         onCancel = { askReset = false },
     )
@@ -440,7 +459,7 @@ private fun openPullList(ctx: android.content.Context) {
 private fun ResetDialog(onKeep: () -> Unit, onDelete: () -> Unit, onCancel: () -> Unit) = AlertDialog(
     onDismissRequest = onCancel,
     title = { Text("Start the route over?") },
-    text = { Text("Go back to Left shelf · top row, spot 1. Keep today's photos (each one is replaced as you reshoot it), or delete them all and start clean.") },
+    text = { Text("Go back to the start of the route and clear the faded line-up guides. Keep today's photos (each one is replaced as you reshoot it), or delete them all and start clean.") },
     confirmButton = { TextButton(onClick = onKeep) { Text("Start over") } },
     dismissButton = {
         Row {
