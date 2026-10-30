@@ -86,6 +86,10 @@ class PhotoStore(private val context: Context) {
         shots(LocalDate.now().toString()).filter { it.name.startsWith(base) }.forEach { delete(it.uri) }
     }
 
+    /** Deletes today's photos of one row, so a new sweep of that row doesn't leave old extra shots behind. */
+    fun deleteSection(section: Section): Int =
+        shots(LocalDate.now().toString()).filter { it.spot?.section?.id == section.id }.count { delete(it.uri) }
+
     fun delete(uri: Uri): Boolean = try { context.contentResolver.delete(uri, null, null) > 0 } catch (e: Exception) { false }
 
     fun deleteDay(date: String): Int = shots(date).count { delete(it.uri) }

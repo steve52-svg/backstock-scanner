@@ -18,7 +18,8 @@ data class Section(
 data class Spot(val section: Section, val step: Int) {
     /** Key used for the saved reference of this exact spot. */
     val key: String get() = "${section.id}-$step"
-    val label: String get() = "${section.title} · spot ${step + 1} of ${section.steps}"
+    val label: String get() =
+        if (step < section.steps) "${section.title} · spot ${step + 1} of ${section.steps}" else "${section.title} · spot ${step + 1}"
 }
 
 object Route {

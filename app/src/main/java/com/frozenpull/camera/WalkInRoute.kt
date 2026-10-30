@@ -48,11 +48,47 @@ private data class LiveCheck(
     val hasTarget: Boolean = false,
     val pitch: Float = 0f,
     val roll: Float = 0f,
+    // Sweep mode
+    val sweepProgress: Float = 0f,
+    val sweepStill: Int = 0,
+    val sweepLost: Boolean = false,
+    val sweepFirst: Boolean = false,
 ) {
+    /** Sweep: moved far enough since the last photo and stopped long enough for a sharp one. */
+    val sweepReady: Boolean get() = level && !sweepLost && sweepStill >= 3 && sweepProgress >= 1f
     val matched: Boolean get() = !hasTarget || score >= 0.65f
     val ready: Boolean get() = level && steady && matched
 }
 
+
+/**
+ * Follows the view as you walk along a shelf (frame to frame, on the analyzer thread)
+ * and says when it has moved about two-thirds of a photo since the last shot,
+ * so the next photo overlaps the last by about a third.
+ */
+private class SweepTracker {
+    private var last: Thumb? = null
+    private var total = 0f
+    var stillFrames = 0; private set
+    var lost = false; private set
+    var first = true; private set
+    /** Set from the screen: restart counting (true = the next photo is the row's first). */
+    val reset = java.util.concurrent.atomic.AtomicReference<Boolean?>(null)
+
+    fun update(t: Thumb) {
+        reset.getAndSet(null)?.let { f -> total = 0f; first = f; last = t; stillFrames = 0; lost = false; return }
+        val prev = last
+        last = t
+        if (prev == null) return
+        val s = Aligner.shift(prev, t)
+        if (s.score < 0.4f) { lost = true; stillFrames = 0; return }
+        lost = false
+        total += s.dx
+        stillFrames = if (kotlin.math.abs(s.dx) <= 1f && kotlin.math.abs(s.dy) <= 2f) stillFrames + 1 else 0
+    }
+
+    val progress: Float get() = if (first) 1f else kotlin.math.abs(total) / (Thumb.W * 0.62f)
+}
 
 /**
  * The walk-in photo route (what used to be the separate Walk-in Camera app):
@@ -112,6 +148,15 @@ private fun GuidedCapture(
     // The previous shot in this row: used for the overlap guide when there is no reference yet.
     var prevThumb by remember { mutableStateOf<Thumb?>(null) }
     var prevGhost by remember { mutableStateOf<Bitmap?>(null) }
+    // Sweep: walk slowly along the row; a photo is taken each time the view has moved
+    // about two-thirds of a frame and you pause.
+    var sweeping by remember { mutableStateOf(false) }
+    val sweepOn = remember { java.util.concurrent.atomic.AtomicBoolean(false) }
+    val tracker = remember { SweepTracker() }
+    LaunchedEffect(sweeping) { sweepOn.set(sweeping) }
+    val beeper = remember {
+        try { android.media.ToneGenerator(android.media.AudioManager.STREAM_NOTIFICATION, 80) } catch (e: Exception) { null }
+    }
 
     val refThumb = remember(spot) { spot?.let { store.referenceThumb(it) } }
     val refGhost = remember(spot) { spot?.let { store.referenceGhost(it) } }
@@ -133,7 +178,7 @@ private fun GuidedCapture(
 
     DisposableEffect(Unit) {
         motion.start()
-        onDispose { motion.stop(); analysisExec.shutdown() }
+        onDispose { motion.stop(); analysisExec.shutdown(); beeper?.release() }
     }
 
     LaunchedEffect(flash) {
@@ -157,13 +202,22 @@ private fun GuidedCapture(
                         lastRun = now
                         val thumb = Thumb.from(image)
                         latestThumb.set(thumb)
-                        val t = target.value
-                        val m = t?.let { Aligner.match(thumb, it.first, it.second) }
-                        val check = LiveCheck(
-                            level = motion.isLevel, steady = motion.isSteady,
-                            score = m?.score ?: 0f, hint = m?.hint ?: Hint.NONE, hasTarget = t != null,
-                            pitch = motion.pitch, roll = motion.roll,
-                        )
+                        val check = if (sweepOn.get()) {
+                            tracker.update(thumb)
+                            LiveCheck(
+                                level = motion.isLevel, steady = motion.isSteady, pitch = motion.pitch, roll = motion.roll,
+                                sweepProgress = tracker.progress, sweepStill = tracker.stillFrames,
+                                sweepLost = tracker.lost, sweepFirst = tracker.first,
+                            )
+                        } else {
+                            val t = target.value
+                            val m = t?.let { Aligner.match(thumb, it.first, it.second) }
+                            LiveCheck(
+                                level = motion.isLevel, steady = motion.isSteady,
+                                score = m?.score ?: 0f, hint = m?.hint ?: Hint.NONE, hasTarget = t != null,
+                                pitch = motion.pitch, roll = motion.roll,
+                            )
+                        }
                         ContextCompat.getMainExecutor(ctx).execute { live = check }
                     }
                 } finally {
@@ -188,6 +242,15 @@ private fun GuidedCapture(
                     view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
                     thumbAtShot?.let { store.saveReference(s, it, ghostAtShot) }
                     lastSaved = "Saved ${s.label}"
+                    if (sweeping) {
+                        // Stay on this row until you tap Row done; count from here for the next photo.
+                        try { beeper?.startTone(android.media.ToneGenerator.TONE_PROP_BEEP, 120) } catch (e: Exception) { }
+                        tracker.reset.set(false)
+                        prevThumb = thumbAtShot; prevGhost = ghostAtShot
+                        spot = s.copy(step = s.step + 1)
+                        busy = false
+                        return
+                    }
                     val next = Route.next(s)
                     if (next != null && next.section == s.section) {
                         prevThumb = thumbAtShot; prevGhost = ghostAtShot
@@ -205,9 +268,24 @@ private fun GuidedCapture(
             })
     }
 
+    fun startSweep() {
+        val s = spot ?: return
+        // Sweeping a row from its start replaces today's photos of that row.
+        if (s.step == 0) store.deleteSection(s.section)
+        tracker.reset.set(s.step == 0 || prevThumb == null)
+        prevThumb = null; prevGhost = null
+        sweeping = true
+        lastSaved = "Sweeping ${s.section.title.lowercase()}"
+    }
+
+    // Sweep: take the photo as soon as you've moved far enough and paused.
+    LaunchedEffect(live, sweeping) {
+        if (sweeping && live.sweepReady && spot != null && !busy) shoot()
+    }
+
     // Auto-shoot once everything has stayed green for 0.7 s.
     LaunchedEffect(live.ready, autoShoot, spot) {
-        if (autoShoot && live.ready && spot != null && !busy) {
+        if (autoShoot && !sweeping && live.ready && spot != null && !busy) {
             kotlinx.coroutines.delay(700)
             if (live.ready && !busy) shoot()
         }
@@ -215,6 +293,9 @@ private fun GuidedCapture(
 
     val green = Color(0xFF2ECC71)
     val frameColor = when {
+        sweeping && live.sweepLost -> Color(0xFFFF6E6E)
+        sweeping && live.sweepProgress >= 1f -> if (live.sweepStill >= 1) green else Color(0xFFF5B841)
+        sweeping -> Color.White.copy(alpha = 0.8f)
         live.ready -> green
         live.level && live.steady -> Color(0xFFF5B841)
         else -> Color.White.copy(alpha = 0.6f)
@@ -224,7 +305,9 @@ private fun GuidedCapture(
         AndroidView({ previewView }, Modifier.fillMaxSize())
 
         // Ghost of last time's photo at this spot: line the live view up with it.
-        if (refGhost != null) {
+        if (sweeping) {
+            // no ghost while sweeping
+        } else if (refGhost != null) {
             Image(refGhost.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop, alpha = 0.3f)
         } else if (prevGhost != null) {
             // No reference yet: show the right third of the previous shot over the left third of the screen.
@@ -234,7 +317,8 @@ private fun GuidedCapture(
         }
 
         // The highlight frame: green when lined up.
-        Box(Modifier.fillMaxSize().padding(10.dp).border(if (live.ready) 8.dp else 3.dp, frameColor, RoundedCornerShape(14.dp)))
+        val strong = if (sweeping) live.sweepReady else live.ready
+        Box(Modifier.fillMaxSize().padding(10.dp).border(if (strong) 8.dp else 3.dp, frameColor, RoundedCornerShape(14.dp)))
 
         // Level guide: a line that tilts with the phone and turns green when level.
         Box(
@@ -262,7 +346,18 @@ private fun GuidedCapture(
                 Text(s.label, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Text(s.section.direction, color = Color.White.copy(alpha = 0.85f))
                 Spacer(Modifier.height(6.dp))
-                Text(instruction(live, refThumb != null, prevThumb != null), color = frameColor, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                if (sweeping) {
+                    Text(sweepInstruction(live, s.section.direction), color = frameColor, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    if (!live.sweepFirst) {
+                        Spacer(Modifier.height(6.dp))
+                        LinearProgressIndicator(
+                            progress = { live.sweepProgress.coerceIn(0f, 1f) },
+                            modifier = Modifier.width(220.dp).height(6.dp), color = frameColor,
+                        )
+                    }
+                } else {
+                    Text(instruction(live, refThumb != null, prevThumb != null), color = frameColor, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
             }
             if (lastSaved.isNotEmpty()) Text(lastSaved, color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp)
         }
@@ -286,9 +381,16 @@ private fun GuidedCapture(
                 ) {
                     TextButton(onClick = { shoot() }, enabled = spot != null && !busy, modifier = Modifier.fillMaxSize()) {}
                 }
-                FilterChip(selected = autoShoot, onClick = { autoShoot = !autoShoot }, label = { Text("Auto") })
-                FilterChip(selected = flash, onClick = { flash = !flash }, label = { Text("Flash") })
+                Button(
+                    onClick = { if (sweeping) sweeping = false else startSweep() }, enabled = spot != null,
+                    colors = ButtonDefaults.buttonColors(containerColor = if (sweeping) Color(0xFFC62828) else Color(0xFFF5B841), contentColor = if (sweeping) Color.White else Color.Black),
+                ) { Text(if (sweeping) "Stop sweep" else "Sweep", fontWeight = FontWeight.Bold) }
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    FilterChip(selected = autoShoot, onClick = { autoShoot = !autoShoot }, label = { Text("Auto") }, enabled = !sweeping)
+                    FilterChip(selected = flash, onClick = { flash = !flash }, label = { Text("Flash") })
+                }
                 OutlinedButton(onClick = {
+                    sweeping = false
                     spot?.let { s -> spot = Route.nextSection(s); prevThumb = null; prevGhost = null }
                 }, enabled = spot != null) { Text("Row done", color = Color.White) }
                 OutlinedButton(onClick = {
@@ -327,6 +429,17 @@ private fun ResetDialog(onKeep: () -> Unit, onDelete: () -> Unit, onCancel: () -
         }
     },
 )
+
+private fun sweepInstruction(c: LiveCheck, direction: String): String = when {
+    c.sweepLost -> "Too fast. Slow down"
+    c.pitch > 6f -> "Tilt the top of the phone toward you"
+    c.pitch < -6f -> "Tilt the top of the phone away from you"
+    !c.level -> "Level the phone"
+    c.sweepFirst -> if (c.sweepStill >= 1) "Hold still, first photo…" else "Aim at the start of the row and hold still"
+    c.sweepProgress < 1f -> "Walk slowly: $direction"
+    c.sweepStill < 1 -> "Stop and hold still"
+    else -> "Hold still…"
+}
 
 private fun instruction(c: LiveCheck, hasRef: Boolean, hasPrev: Boolean): String = when {
     c.pitch > 6f -> "Tilt the top of the phone toward you"

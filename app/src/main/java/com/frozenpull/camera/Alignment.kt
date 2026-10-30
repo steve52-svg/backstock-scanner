@@ -110,6 +110,25 @@ object Aligner {
         return Match(best, hint)
     }
 
+    /** How far the view moved between two frames taken a moment apart, in thumbnail pixels. */
+    data class Shift(val dx: Float, val dy: Float, val score: Float)
+
+    fun shift(prev: Thumb, cur: Thumb): Shift {
+        val W = Thumb.W; val H = Thumb.H
+        var best = -2f; var bx = 0; var by = 0
+        for (dy in -6..6 step 2) for (dx in -20..20 step 2) {
+            val r = ncc(cur, prev, W, 0f, dx.toFloat(), dy.toFloat(), 1f, W, H)
+            if (r > best) { best = r; bx = dx; by = dy }
+        }
+        // refine to the nearest pixel
+        var fx = bx
+        for (dx in (bx - 1)..(bx + 1)) {
+            val r = ncc(cur, prev, W, 0f, dx.toFloat(), by.toFloat(), 1f, W, H)
+            if (r > best) { best = r; fx = dx }
+        }
+        return Shift(fx.toFloat(), by.toFloat(), best)
+    }
+
     /**
      * Normalized cross-correlation between live(u, v) and target at the matching point:
      * target(baseDx + cx + (u - cx) * s + dx, cy + (v - cy) * s + dy).
