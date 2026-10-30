@@ -93,7 +93,7 @@ object Holder {
     fun get(ctx: Context): AppState = state ?: AppState(ctx).also { state = it }
 }
 
-const val APP_VERSION = "0.9"
+const val APP_VERSION = "1.0"
 
 val Sure = Color(0xFF2ECC71)
 val Maybe = Color(0xFFF5B041)
@@ -130,7 +130,7 @@ private fun CameraPermissionGate(content: @Composable () -> Unit) {
     }
 }
 
-enum class Screen { CAMERA, RESULTS, FOUND, ROUTE, HANDSFREE }
+enum class Screen { CAMERA, RESULTS, FOUND, ROUTE, HANDSFREE, PULL }
 
 @Composable
 fun AppRoot(state: AppState) {
@@ -158,9 +158,9 @@ fun AppRoot(state: AppState) {
     }
     val openGallery = { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
 
-    BackHandler(enabled = screen != Screen.CAMERA) { screen = Screen.CAMERA }
+    BackHandler(enabled = screen != Screen.CAMERA) { screen = if (screen == Screen.HANDSFREE) Screen.PULL else Screen.CAMERA }
     LaunchedEffect(state.openHandsFree) {
-        if (state.openHandsFree) { screen = Screen.HANDSFREE; state.openHandsFree = false }
+        if (state.openHandsFree) { screen = Screen.PULL; state.openHandsFree = false }
     }
 
     Box(Modifier.fillMaxSize().background(Bg)) {
@@ -171,7 +171,7 @@ fun AppRoot(state: AppState) {
                 onGallery = openGallery,
                 onFound = { screen = Screen.FOUND },
                 onRoute = { screen = Screen.ROUTE },
-                onHandsFree = { screen = Screen.HANDSFREE },
+                onHandsFree = { screen = Screen.PULL },
                 onResults = { photoIndex = state.photos.lastIndex; screen = Screen.RESULTS },
             )
             Screen.RESULTS -> ResultsScreen(
@@ -181,7 +181,8 @@ fun AppRoot(state: AppState) {
                 onFound = { screen = Screen.FOUND },
             )
             Screen.FOUND -> FoundScreen(state, onBack = { screen = Screen.CAMERA })
-            Screen.HANDSFREE -> HandsFreeScreen(state, onBack = { screen = Screen.CAMERA })
+            Screen.HANDSFREE -> HandsFreeScreen(state, onBack = { screen = Screen.PULL })
+            Screen.PULL -> PullScreen(state, onBack = { screen = Screen.CAMERA }, onHandsFree = { screen = Screen.HANDSFREE })
             Screen.ROUTE -> com.frozenpull.camera.WalkInSection(
                 onExit = { screen = Screen.CAMERA },
                 onRead = { uris, labels -> scanAll(uris) { labels.getOrElse(it) { "Walk-in photo" } } },
@@ -293,7 +294,7 @@ fun CameraScreen(
             Button(
                 onClick = onHandsFree, enabled = !busy, modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4FC0CC), contentColor = Color.Black),
-            ) { Text("Hands-free pull", fontWeight = FontWeight.Bold) }
+            ) { Text("Pull list", fontWeight = FontWeight.Bold) }
             OutlinedButton(onClick = onGallery, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text("Scan photos", color = Color.White) }
             OutlinedButton(onClick = onFound, modifier = Modifier.fillMaxWidth()) { Text("Found (${state.found.items.size})", color = Color.White) }
             if (state.photos.isNotEmpty()) {

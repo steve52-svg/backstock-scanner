@@ -66,8 +66,10 @@ class AppState(private val context: Context) {
     val scanner = Scanner(matcher, learned)
     val found = Found(context)
     val photos = mutableStateListOf<ScanPhoto>()
-    val pullRun = PullRun(context)
-    /** Set when a pull list was shared to the app; opens hands-free. */
+    /** Today's stock list and pull list (filled from the pull list page). */
+    val stock = StockStore(context)
+    val pullRun = PullRun(stock)
+    /** Set when a list was shared to the app; opens the pull list. */
     var openHandsFree by mutableStateOf(false)
 
     private val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)

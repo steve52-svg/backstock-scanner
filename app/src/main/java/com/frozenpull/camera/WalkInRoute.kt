@@ -400,7 +400,7 @@ private fun GuidedCapture(
                 OutlinedButton(onClick = onExit) { Text("‹ Scanner", color = Color.White) }
                 OutlinedButton(onClick = onReadToday) { Text("Read photos", color = Color.White) }
                 OutlinedButton(onClick = onOpenPhotos) { Text("Photos", color = Color.White) }
-                OutlinedButton(onClick = { openPullList(ctx) }) { Text("Pull list", color = Color.White) }
+                OutlinedButton(onClick = { openPullList(ctx) }) { Text("Pull list page", color = Color.White) }
                 OutlinedButton(onClick = {
                     sweeping = false; RouteState.checkDone.value = false
                     spot = Route.checkFirst(); prevThumb = null; prevGhost = null

@@ -67,6 +67,7 @@ fun HandsFreeScreen(state: AppState, onBack: () -> Unit) {
 
     val actRef = remember { mutableStateOf<(Cmd) -> Unit>({}) }
     val voice = remember { Voice(ctx, onCommand = { actRef.value(it) }, onStatus = { status = it }) }
+    LaunchedEffect(Unit) { run.sync() }
     DisposableEffect(Unit) {
         voice.start()
         view.keepScreenOn = true
@@ -121,8 +122,8 @@ fun HandsFreeScreen(state: AppState, onBack: () -> Unit) {
     fun pasteList() {
         val text = clip?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(ctx)?.toString().orEmpty()
         val n = run.load(text)
-        note = if (n > 0) "Loaded $n items." else "Nothing to load. On the pull list page tap Hands-free (or Print & share → Copy as text) first."
-        if (n > 0) voice.speak("$n items. First: ${sayItem(0)}")
+        note = if (n > 0) "Loaded from the pull list page: ${run.items.size} to pull." else "Nothing to load. On the pull list page tap Send to app first."
+        if (n > 0 && run.items.isNotEmpty()) voice.speak("${run.items.size} items. First: ${sayItem(run.index)}")
     }
     fun copyResults() {
         clip?.setPrimaryClip(ClipData.newPlainText("Pull results", run.resultsText()))
@@ -139,7 +140,7 @@ fun HandsFreeScreen(state: AppState, onBack: () -> Unit) {
             TextButton(onClick = onBack) { Text("‹ Scanner", color = Color.White) }
             FilterChip(selected = listen, onClick = { toggleListen() }, label = { Text(if (listen) "Voice: on" else "Voice: off") })
             FilterChip(selected = talk, onClick = { talk = !talk; voice.talk = talk }, label = { Text(if (talk) "Read aloud" else "Silent") })
-            OutlinedButton(onClick = { pasteList() }) { Text("Paste pull list", color = Color.White) }
+            OutlinedButton(onClick = { pasteList() }) { Text("Load from page", color = Color.White) }
             OutlinedButton(onClick = { copyResults() }, enabled = run.pulled + run.cant > 0) { Text("Copy results", color = Color.White) }
             val warn = Color(0xFFFF8A80)
             OutlinedButton(onClick = { confirm = "restart" }, enabled = run.items.isNotEmpty()) { Text("Start over", color = Color.White) }
@@ -155,9 +156,9 @@ fun HandsFreeScreen(state: AppState, onBack: () -> Unit) {
 
         if (run.items.isEmpty()) {
             Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center) {
-                Text("No pull list yet", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text("Nothing on the pull list", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
-                Text("1. On the Frozen Pull List page, switch to Pull list and tap Hands-free (it copies the list).\n2. Come back here and tap Paste pull list.\n3. When you're done, tap Copy results, then Paste results from app on the page.",
+                Text("Mark items Need on the Pull list screen (‹ Scanner → Pull list), or on the pull list page and tap Send to app. Then come back here.",
                     color = Color.White.copy(alpha = 0.85f), fontSize = 16.sp)
             }
             return@Column
@@ -222,9 +223,9 @@ fun HandsFreeScreen(state: AppState, onBack: () -> Unit) {
         "clear" -> AlertDialog(
             onDismissRequest = { confirm = null },
             title = { Text("Clear all?") },
-            text = { Text("Removes this pull list and its Pulled / Can't find marks from the app. Copy results first if you still need them.") },
+            text = { Text("Takes everything off the pull list, with its Pulled / Can't find marks. The stock list stays. Copy results first if the page still needs them.") },
             confirmButton = { TextButton(onClick = {
-                confirm = null; listen = false; voice.hush(); run.clear(); note = "List cleared. Paste a new pull list to start."
+                confirm = null; listen = false; voice.hush(); run.clear(); note = "Pull list cleared."
             }) { Text("Clear all", color = Color(0xFFE5534B)) } },
             dismissButton = { TextButton(onClick = { confirm = null }) { Text("Cancel") } },
         )
