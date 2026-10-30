@@ -1,0 +1,2908 @@
+{
+ "version": "2026-10-29",
+ "products": [
+  {
+   "id": "12-classic-lemon-bars",
+   "name": "12 Classic Lemon Bars",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.5,
+   "order": 1010
+  },
+  {
+   "id": "12-sweet-bites",
+   "name": "12 Sweet Bites",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "12 Sweet Bites"
+   ],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Desserts",
+   "pos": 8,
+   "order": 2008
+  },
+  {
+   "id": "2-affogatos",
+   "name": "2 Affogatos",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Ice Cream",
+   "pos": 12.5,
+   "order": 1012
+  },
+  {
+   "id": "3-cheese-pizza-organic",
+   "name": "3 Cheese Pizza (organic)",
+   "sku": "38285",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 15,
+   "order": 1015
+  },
+  {
+   "id": "acai-puree",
+   "name": "Acai Puree",
+   "sku": "86417",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Breakfast",
+   "pos": 21,
+   "order": 2021
+  },
+  {
+   "id": "almond-croissants",
+   "name": "Almond Croissants",
+   "sku": "99265",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Breakfast",
+   "pos": 27,
+   "order": 27
+  },
+  {
+   "id": "asian-style-vegetables",
+   "name": "Asian Style Vegetables",
+   "sku": "244180",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 2,
+   "order": 201002
+  },
+  {
+   "id": "asparagus-spears",
+   "name": "Asparagus Spears",
+   "sku": "105027",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 3,
+   "order": 201003
+  },
+  {
+   "id": "baingan-bharta",
+   "name": "Baingan Bharta",
+   "sku": "95249",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 14,
+   "order": 14
+  },
+  {
+   "id": "baladi-egyptian-flatbread-pocket-bread",
+   "name": "Baladi Egyptian Flatbread / Pocket Bread",
+   "sku": "78015",
+   "caseCode": "00780155",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Breads",
+   "pos": 18,
+   "order": 2018
+  },
+  {
+   "id": "basque-style-cheesecakes",
+   "name": "Basque Style Cheesecakes",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.5,
+   "order": 1010
+  },
+  {
+   "id": "bbq-chicken-pizza",
+   "name": "BBQ Chicken Pizza",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 15,
+   "order": 1015
+  },
+  {
+   "id": "bbq-pork-fried-rice",
+   "name": "BBQ Pork Fried Rice",
+   "sku": "83189",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 4,
+   "order": 201004
+  },
+  {
+   "id": "beef-bulgogi",
+   "name": "Beef Bulgogi",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Bulgogi"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 9,
+   "order": 201009
+  },
+  {
+   "id": "beef-meatballs-party-size",
+   "name": "Beef Meatballs (party size)",
+   "sku": "77262",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Appetizers",
+   "pos": 14,
+   "order": 1014
+  },
+  {
+   "id": "beef-shepherd-s-pie",
+   "name": "Beef Shepherd's Pie",
+   "sku": "36260",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 13,
+   "order": 201013
+  },
+  {
+   "id": "beef-tacos",
+   "name": "Beef Tacos",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 9,
+   "order": 201009
+  },
+  {
+   "id": "belgian-waffles",
+   "name": "Belgian Waffles",
+   "sku": "96967",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 25,
+   "order": 1025
+  },
+  {
+   "id": "black-sesame-mochi",
+   "name": "Black Sesame Mochi",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Ice Cream",
+   "pos": 9,
+   "order": 2009
+  },
+  {
+   "id": "blossoms",
+   "name": "Apple Blossoms",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Apple Blossoms",
+    "Blossoms"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Desserts",
+   "pos": 7,
+   "order": 1007
+  },
+  {
+   "id": "blueberries",
+   "name": "Blueberries",
+   "sku": "112530",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 5,
+   "order": 101005
+  },
+  {
+   "id": "boneless-skinless-chicken-thighs",
+   "name": "Boneless Skinless Chicken Thighs",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Floor",
+   "pos": 10,
+   "order": 201010
+  },
+  {
+   "id": "brazilian-style-cheese-bread",
+   "name": "Brazilian Style Cheese Bread",
+   "sku": "64355",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breads",
+   "pos": 18,
+   "order": 1018
+  },
+  {
+   "id": "breaded-cheddar-cheese-curds",
+   "name": "Breaded Cheddar Cheese Curds",
+   "sku": "75557",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Appetizers",
+   "pos": 18,
+   "order": 2018
+  },
+  {
+   "id": "breaded-chicken-tenderloins",
+   "name": "Breaded Chicken Tenderloins",
+   "sku": "188109",
+   "caseCode": "",
+   "aliases": [
+    "Breaded Chicken Tenderloin"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 12,
+   "order": 201012
+  },
+  {
+   "id": "breaded-fried-ravioli",
+   "name": "Breaded Fried Ravioli",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Appetizers",
+   "pos": 20.5,
+   "order": 1020
+  },
+  {
+   "id": "breakfast-bowl",
+   "name": "Breakfast Bowl",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Breakie Bowl"
+   ],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Breakfast",
+   "pos": 20,
+   "order": 2020
+  },
+  {
+   "id": "brigadeiros",
+   "name": "Brigadeiros",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Desserts",
+   "pos": 9,
+   "order": 2009
+  },
+  {
+   "id": "brownie-crisp-ice-cream-sandwiches",
+   "name": "Brownie Crisp Ice Cream Sandwiches",
+   "sku": "58761",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Ice Cream",
+   "pos": 10,
+   "order": 10
+  },
+  {
+   "id": "brussels-sprouts",
+   "name": "Brussels Sprouts",
+   "sku": "93945",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 2,
+   "order": 201002
+  },
+  {
+   "id": "bulgogi-beef-fried-rice",
+   "name": "Bulgogi Beef Fried Rice",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 4,
+   "order": 201004
+  },
+  {
+   "id": "burger-shrimp",
+   "name": "Burger Shrimp",
+   "sku": "57733",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 13,
+   "order": 201013
+  },
+  {
+   "id": "burrata-prosciutto-arugula-flatbread",
+   "name": "Burrata, Prosciutto & Arugula Flatbread",
+   "sku": "54784",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 17,
+   "order": 1017
+  },
+  {
+   "id": "burrito-bowl",
+   "name": "Burrito Bowl",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 9,
+   "order": 201009
+  },
+  {
+   "id": "butter-chicken-with-basmati-rice",
+   "name": "Butter Chicken with Basmati Rice",
+   "sku": "99032",
+   "caseCode": "00990325",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 16,
+   "order": 16
+  },
+  {
+   "id": "butternut-mac-cheese",
+   "name": "Butternut Mac & Cheese",
+   "sku": "61023",
+   "caseCode": "",
+   "aliases": [
+    "Hol Mac & Cheese Butternut"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 10,
+   "order": 201010
+  },
+  {
+   "id": "butternut-squash-mac",
+   "name": "Butternut Squash Mac n cheese",
+   "sku": "72700",
+   "caseCode": "",
+   "aliases": [
+    "Hol Butternut Squash Mac"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 12,
+   "order": 201012
+  },
+  {
+   "id": "cacio-e-pepe-gnocchi",
+   "name": "Cacio e Pepe Gnocchi",
+   "sku": "73792",
+   "caseCode": "",
+   "aliases": [
+    "Cacio Gnocchi"
+   ],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Pasta",
+   "pos": 23,
+   "order": 23
+  },
+  {
+   "id": "cauliflower-bowl",
+   "name": "Cauliflower Bowl",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 2,
+   "order": 201002
+  },
+  {
+   "id": "cauliflower-riced-stir-fry",
+   "name": "Cauliflower Riced Stir Fry",
+   "sku": "60024",
+   "caseCode": "",
+   "aliases": [
+    "Cauliflower Riced Stir Fry"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 1,
+   "order": 201001
+  },
+  {
+   "id": "cha-siu-bao",
+   "name": "Cha Siu Bao",
+   "sku": "95294",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 9,
+   "order": 201009
+  },
+  {
+   "id": "channa-masala",
+   "name": "Channa Masala",
+   "sku": "99144",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 15,
+   "order": 15
+  },
+  {
+   "id": "cheese-blintzes",
+   "name": "Cheese Blintzes",
+   "sku": "99385",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 21,
+   "order": 1021
+  },
+  {
+   "id": "cheese-green-chile-tamales",
+   "name": "Cheese & Green Chile Tamales",
+   "sku": "108450",
+   "caseCode": "",
+   "aliases": [
+    "Tamales Cheese & Green Chile"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 7,
+   "order": 201007
+  },
+  {
+   "id": "cherry-berry-blend",
+   "name": "Cherry Berry Blend",
+   "sku": "159757",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 4,
+   "order": 101004
+  },
+  {
+   "id": "chicken-adobo",
+   "name": "Chicken Adobo",
+   "sku": "81056",
+   "caseCode": "",
+   "aliases": [
+    "Chicken Adobo Filipino"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 11,
+   "order": 201011
+  },
+  {
+   "id": "chicken-burrito-bowl",
+   "name": "Chicken Burrito Bowl",
+   "sku": "57750",
+   "caseCode": "",
+   "aliases": [
+    "Bowl Chicken Burrito"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 5,
+   "order": 201005
+  },
+  {
+   "id": "chicken-chile-verde-burritos",
+   "name": "Chicken Chile Verde Burritos",
+   "sku": "79689",
+   "caseCode": "",
+   "aliases": [
+    "Burritos Chicken Chile Verde"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 8,
+   "order": 201008
+  },
+  {
+   "id": "chicken-fried-rice",
+   "name": "Chicken Fried Rice",
+   "sku": "33251",
+   "caseCode": "",
+   "aliases": [
+    "Fried Rice Chicken"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 5,
+   "order": 201005
+  },
+  {
+   "id": "chicken-gyoza-potstickers",
+   "name": "Chicken Gyoza Potstickers",
+   "sku": "3663",
+   "caseCode": "",
+   "aliases": [
+    "Gyoza Chicken Potstickers"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 4,
+   "order": 201004
+  },
+  {
+   "id": "chicken-nuggets",
+   "name": "Chicken Nuggets",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 14,
+   "order": 201014
+  },
+  {
+   "id": "chicken-shawarma-bowl",
+   "name": "Chicken Shawarma Bowl",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 19.5,
+   "order": 19
+  },
+  {
+   "id": "chicken-shu-mai",
+   "name": "Chicken Shu Mai",
+   "sku": "46189",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 9,
+   "order": 201009
+  },
+  {
+   "id": "chicken-spring-rolls",
+   "name": "Chicken Spring Rolls",
+   "sku": "55571",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 3,
+   "order": 201003
+  },
+  {
+   "id": "chicken-taquitos",
+   "name": "Chicken Taquitos",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 6,
+   "order": 201006
+  },
+  {
+   "id": "chicken-tikka-masala",
+   "name": "Chicken Tikka Masala",
+   "sku": "99142",
+   "caseCode": "00991421",
+   "aliases": [
+    "Chn Tka w/ Jra Rice",
+    "TJCT"
+   ],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 17,
+   "order": 17
+  },
+  {
+   "id": "chiles-rellenos",
+   "name": "Chiles Rellenos",
+   "sku": "75234",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 8,
+   "order": 201008
+  },
+  {
+   "id": "chocolate-cheesecake-bites",
+   "name": "Chocolate Cheesecake Bites",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.5,
+   "order": 1010
+  },
+  {
+   "id": "chocolate-covered-bananas",
+   "name": "Chocolate Covered Bananas",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 5,
+   "order": 1005
+  },
+  {
+   "id": "chocolate-non-dairy-frozen-dessert",
+   "name": "Chocolate Non-Dairy Frozen Dessert",
+   "sku": "",
+   "caseCode": "00949965",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 10,
+   "order": 1010
+  },
+  {
+   "id": "coffee-ice-cream-sandwiches",
+   "name": "Coffee Ice Cream Sandwiches",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "coffee ice cream sandwiches"
+   ],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Ice Cream",
+   "pos": 12,
+   "order": 12
+  },
+  {
+   "id": "cookie-butter-ice-cream",
+   "name": "Cookie Butter Ice Cream",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 2,
+   "order": 1002
+  },
+  {
+   "id": "crispy-battered-calamari",
+   "name": "Crispy Battered Calamari",
+   "sku": "76226",
+   "caseCode": "",
+   "aliases": [
+    "Calamari Crispy Battered"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 10,
+   "order": 201010
+  },
+  {
+   "id": "dairy-free-cones",
+   "name": "Dairy-Free Cones",
+   "sku": "",
+   "caseCode": "00711197",
+   "aliases": [
+    "DF Cones"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 11,
+   "order": 1011
+  },
+  {
+   "id": "dark-sweet-cherries",
+   "name": "Dark Sweet Cherries",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Cherry",
+    "Sweet Cherry"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 1,
+   "order": 201001
+  },
+  {
+   "id": "edamame",
+   "name": "Edamame",
+   "sku": "151063",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 5,
+   "order": 101005
+  },
+  {
+   "id": "empanadas-de-ropa-vieja",
+   "name": "Empanadas de Ropa Vieja",
+   "sku": "176647",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 8,
+   "order": 201008
+  },
+  {
+   "id": "english-muffin-breakfast-sandwich-sausage-egg-cheddar",
+   "name": "English Muffin Breakfast Sandwich (sausage, egg & cheddar)",
+   "sku": "82739",
+   "caseCode": "00827393",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Breakfast",
+   "pos": 20,
+   "order": 2020
+  },
+  {
+   "id": "everything-smoked-salmon",
+   "name": "Everything Smoked Salmon",
+   "sku": "63465",
+   "caseCode": "",
+   "aliases": [
+    "Salmon Smoked Everything"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 13,
+   "order": 201013
+  },
+  {
+   "id": "family-style-meat-lasagna",
+   "name": "Family Style Meat Lasagna",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 12,
+   "order": 201012
+  },
+  {
+   "id": "fiery-chicken-vindaloo",
+   "name": "Fiery Chicken Vindaloo",
+   "sku": "59464",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 18,
+   "order": 18
+  },
+  {
+   "id": "fish-sticks",
+   "name": "Fish Sticks",
+   "sku": "98967",
+   "caseCode": "",
+   "aliases": [
+    "Fish Sticks Breaded"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 12,
+   "order": 201012
+  },
+  {
+   "id": "flautas",
+   "name": "Flautas",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Hautas"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 7,
+   "order": 201007
+  },
+  {
+   "id": "french-macarons",
+   "name": "French Macarons",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.5,
+   "order": 1010
+  },
+  {
+   "id": "fried-olive-bites",
+   "name": "Fried Olive Bites",
+   "sku": "69333",
+   "caseCode": "00693332",
+   "aliases": [
+    "Hol Fried Olive Bites"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 14,
+   "order": 201014
+  },
+  {
+   "id": "fruit-frenzy-bars",
+   "name": "Fruit Frenzy Bars",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Ice Cream",
+   "pos": 12.5,
+   "order": 1012
+  },
+  {
+   "id": "fruits-greens-smoothie-blend",
+   "name": "Fruits & Greens Smoothie Blend",
+   "sku": "75603",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 2,
+   "order": 101002
+  },
+  {
+   "id": "g-zleme-turkish-stuffed-flatbread",
+   "name": "Gözleme (Turkish stuffed flatbread)",
+   "sku": "82261",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 17,
+   "order": 2017
+  },
+  {
+   "id": "garlic-naan",
+   "name": "Garlic Naan",
+   "sku": "77678",
+   "caseCode": "00200776783",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breads",
+   "pos": 15,
+   "order": 1015
+  },
+  {
+   "id": "ginger-shrimp-lo-mein",
+   "name": "Ginger Shrimp Lo Mein",
+   "sku": "75821",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 8,
+   "order": 201008
+  },
+  {
+   "id": "gluten-free-cauliflower-crust-cheese-pizza",
+   "name": "Gluten Free Cauliflower Crust Cheese Pizza",
+   "sku": "78836",
+   "caseCode": "",
+   "aliases": [
+    "Cauli Pizz",
+    "Cauli Pizza"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 16,
+   "order": 1016
+  },
+  {
+   "id": "gluten-free-pie-shells",
+   "name": "Gluten Free Pie Shells",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.6,
+   "order": 1010
+  },
+  {
+   "id": "gluten-free-waffles",
+   "name": "Gluten Free Waffles",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "gluten free waffle"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 23,
+   "order": 1023
+  },
+  {
+   "id": "gnocchi-alla-sorrentina",
+   "name": "Gnocchi alla Sorrentina",
+   "sku": "31890",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Pasta",
+   "pos": 21,
+   "order": 21
+  },
+  {
+   "id": "green-tea-mochi",
+   "name": "Green Tea Mochi",
+   "sku": "164669",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 10,
+   "order": 1010
+  },
+  {
+   "id": "griddle-cakes",
+   "name": "Griddle Cakes",
+   "sku": "74741",
+   "caseCode": "",
+   "aliases": [
+    "Griddle Cakes"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 21,
+   "order": 1021
+  },
+  {
+   "id": "ham-swiss-cheese-pockets",
+   "name": "Ham & Swiss Cheese Pockets",
+   "sku": "83232",
+   "caseCode": "",
+   "aliases": [
+    "Croissant Ham and Cheese"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 10,
+   "order": 201010
+  },
+  {
+   "id": "hane-style-beef-gyoza",
+   "name": "Hane-Style Beef Gyoza",
+   "sku": "83778",
+   "caseCode": "",
+   "aliases": [
+    "Gyoza Crispy Beef"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 4,
+   "order": 201004
+  },
+  {
+   "id": "hash-brown-patties",
+   "name": "Hash Brown Patties",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Breakfast",
+   "pos": 25.5,
+   "order": 1025
+  },
+  {
+   "id": "hatch-chile-chicken-wraps",
+   "name": "Hatch Chile Chicken Wraps",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Appetizers",
+   "pos": 20.5,
+   "order": 1020
+  },
+  {
+   "id": "hold-the-cone-chocolate",
+   "name": "Hold the Cone Chocolate",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Ice Cream",
+   "pos": 6,
+   "order": 6
+  },
+  {
+   "id": "hold-the-cone-pumpkin",
+   "name": "Hold the Cone Pumpkin",
+   "sku": "161123",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Ice Cream",
+   "pos": 7,
+   "order": 7
+  },
+  {
+   "id": "hold-the-cone-strawberry",
+   "name": "Hold the Cone Strawberry",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Ice Cream",
+   "pos": 8,
+   "order": 8
+  },
+  {
+   "id": "hold-the-cone-vanilla",
+   "name": "Hold the Cone Vanilla",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Ice Cream",
+   "pos": 5,
+   "order": 5
+  },
+  {
+   "id": "holiday-butternut-squash-lasagna",
+   "name": "Holiday Butternut Squash Lasagna",
+   "sku": "79675",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 5,
+   "order": 201005
+  },
+  {
+   "id": "holiday-maple-leaf-ice-cream-sandwiches",
+   "name": "Holiday Maple Leaf Ice Cream Sandwiches",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Ice Cream",
+   "pos": 7,
+   "order": 2007
+  },
+  {
+   "id": "holiday-pumpkin-pie",
+   "name": "Holiday Pumpkin Pie",
+   "sku": "165222",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Front wall",
+   "row": "",
+   "section": "Front wall",
+   "pos": 4,
+   "order": 301004
+  },
+  {
+   "id": "holiday-turkey-stuffing-en-croute",
+   "name": "Holiday Turkey & Stuffing en Croute",
+   "sku": "85033",
+   "caseCode": "",
+   "aliases": [
+    "Hol Turkey & Stuffing en Croute"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 11,
+   "order": 201011
+  },
+  {
+   "id": "japanese-mini-taiyaki",
+   "name": "Japanese Mini Taiyaki",
+   "sku": "75997",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 24,
+   "order": 1024
+  },
+  {
+   "id": "japanese-souffl-cheesecakes",
+   "name": "Japanese Soufflé Cheesecakes",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.5,
+   "order": 1010
+  },
+  {
+   "id": "japanese-style-fried-rice",
+   "name": "Japanese Style Fried Rice",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 2,
+   "order": 201002
+  },
+  {
+   "id": "japchae-fried-rice",
+   "name": "Japchae Fried Rice",
+   "sku": "79732",
+   "caseCode": "",
+   "aliases": [
+    "Fried Rice Japchae"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 7,
+   "order": 201007
+  },
+  {
+   "id": "kibbeh",
+   "name": "Kibbeh",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Appetizers",
+   "pos": 20.5,
+   "order": 1020
+  },
+  {
+   "id": "korean-style-beef-short-ribs",
+   "name": "Korean Style Beef Short Ribs",
+   "sku": "90809",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 9,
+   "order": 201009
+  },
+  {
+   "id": "lamb-vindaloo",
+   "name": "Lamb Vindaloo",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Lamb Vind",
+    "Lmb Vindaloo"
+   ],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 19,
+   "order": 19
+  },
+  {
+   "id": "langostino-tails",
+   "name": "Langostino Tails",
+   "sku": "198541",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 11,
+   "order": 201011
+  },
+  {
+   "id": "lava-cakes",
+   "name": "Lava Cakes",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Lava"
+   ],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Desserts",
+   "pos": 9,
+   "order": 9
+  },
+  {
+   "id": "linguine-nerano",
+   "name": "Linguine Nerano",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Pasta",
+   "pos": 26,
+   "order": 26
+  },
+  {
+   "id": "linguine-with-pesto-tomato",
+   "name": "Linguine with Pesto & Tomato",
+   "sku": "50469",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Pasta",
+   "pos": 24,
+   "order": 24
+  },
+  {
+   "id": "mac-cheese-joe-s-diner",
+   "name": "Mac & Cheese Joe's Diner",
+   "sku": "103655",
+   "caseCode": "",
+   "aliases": [
+    "Mac & Cheese Joe's Diner"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 11,
+   "order": 201011
+  },
+  {
+   "id": "mac-cheese-pepperoni-pizza",
+   "name": "Mac & Cheese Pepperoni Pizza",
+   "sku": "157021",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 12,
+   "order": 201012
+  },
+  {
+   "id": "mandarin-orange-chicken-bowl",
+   "name": "Mandarin Orange Chicken Bowl",
+   "sku": "64527",
+   "caseCode": "",
+   "aliases": [
+    "Bowl Mandarin Orange Chicken",
+    "MOC Bowl"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 9,
+   "order": 201009
+  },
+  {
+   "id": "mandarin-orange-chicken",
+   "name": "Mandarin Orange Chicken",
+   "sku": "66563",
+   "caseCode": "",
+   "aliases": [
+    "Chicken Orange Mandarin",
+    "MOC"
+   ],
+   "shelf": "Front wall",
+   "row": "",
+   "section": "Front wall",
+   "pos": 2,
+   "order": 301002
+  },
+  {
+   "id": "mandu-kimchi-korean-dumplings",
+   "name": "Mandu Kimchi Korean Dumplings",
+   "sku": "82762",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 4,
+   "order": 201004
+  },
+  {
+   "id": "mango-cream-bars",
+   "name": "Mango Cream Bars",
+   "sku": "74869",
+   "caseCode": "00000007486982",
+   "aliases": [
+    "Mango Cream Bars"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 12,
+   "order": 1012
+  },
+  {
+   "id": "margherita-pizza-wood-fired",
+   "name": "Margherita Pizza (wood fired)",
+   "sku": "80530",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 13,
+   "order": 2013
+  },
+  {
+   "id": "meatless-breakfast-sausage-patties",
+   "name": "Meatless Breakfast Sausage Patties",
+   "sku": "76266",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Breakfast",
+   "pos": 28,
+   "order": 28
+  },
+  {
+   "id": "mexican-riced-cauliflower",
+   "name": "Mexican Riced Cauliflower",
+   "sku": "69856",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 3,
+   "order": 101003
+  },
+  {
+   "id": "mini-chicken-tacos",
+   "name": "Mini Chicken Tacos",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 8,
+   "order": 201008
+  },
+  {
+   "id": "mini-chicken-tikka-samosas",
+   "name": "Mini Chicken Tikka Samosas",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 19.5,
+   "order": 19
+  },
+  {
+   "id": "mini-french-baguettes",
+   "name": "Mini French Baguettes",
+   "sku": "62839",
+   "caseCode": "",
+   "aliases": [
+    "Frozen Baguettes Mini French"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 14,
+   "order": 201014
+  },
+  {
+   "id": "mini-mushroom-tartelettes",
+   "name": "Mini Mushroom Tartelettes",
+   "sku": "79108",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Appetizers",
+   "pos": 17,
+   "order": 2017
+  },
+  {
+   "id": "mini-wontons",
+   "name": "Mini Wontons",
+   "sku": "99085",
+   "caseCode": "",
+   "aliases": [
+    "Wontons Chicken Cilantro"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 8,
+   "order": 201008
+  },
+  {
+   "id": "mint-chip-ice-cream",
+   "name": "Mint Chip Ice Cream",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 3,
+   "order": 1003
+  },
+  {
+   "id": "morning-buns",
+   "name": "Morning Buns",
+   "sku": "82774",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 19,
+   "order": 1019
+  },
+  {
+   "id": "mushroom-black-truffle-flatbread",
+   "name": "Mushroom & Black Truffle Flatbread",
+   "sku": "90538",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 18,
+   "order": 1018
+  },
+  {
+   "id": "mushroom-medley",
+   "name": "Mushroom Medley",
+   "sku": "51759",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 1,
+   "order": 201001
+  },
+  {
+   "id": "nova-smoked-salmon",
+   "name": "Nova Smoked Salmon",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Norwegian",
+    "Nova Snacks",
+    "½ Norwegian"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 13,
+   "order": 201013
+  },
+  {
+   "id": "oat-non-dairy-frozen-dessert-sandwiches",
+   "name": "Oat Non-Dairy Frozen Dessert Sandwiches",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 8,
+   "order": 1008
+  },
+  {
+   "id": "onion-flower",
+   "name": "Onion Flower",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Appetizers",
+   "pos": 22,
+   "order": 1022
+  },
+  {
+   "id": "organic-basmati-rice",
+   "name": "Organic Basmati Rice",
+   "sku": "82778",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Front wall",
+   "row": "",
+   "section": "Front wall",
+   "pos": 0,
+   "order": 301000
+  },
+  {
+   "id": "organic-brown-rice",
+   "name": "Organic Brown Rice",
+   "sku": "193756",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Front wall",
+   "row": "",
+   "section": "Front wall",
+   "pos": 0.5,
+   "order": 301000
+  },
+  {
+   "id": "organic-foursome",
+   "name": "Organic Foursome",
+   "sku": "90867",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 4,
+   "order": 101004
+  },
+  {
+   "id": "organic-french-baguette",
+   "name": "Organic French Baguette",
+   "sku": "53835",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Front wall",
+   "row": "",
+   "section": "Front wall",
+   "pos": 3,
+   "order": 301003
+  },
+  {
+   "id": "organic-jasmine-rice",
+   "name": "Organic Jasmine Rice",
+   "sku": "163573",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Front wall",
+   "row": "",
+   "section": "Front wall",
+   "pos": 1,
+   "order": 301001
+  },
+  {
+   "id": "organic-mixed-berries",
+   "name": "Organic Mixed Berries",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 4,
+   "order": 101004
+  },
+  {
+   "id": "organic-peas",
+   "name": "Organic Peas",
+   "sku": "49663",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 4,
+   "order": 101004
+  },
+  {
+   "id": "organic-super-sweet-cut-corn",
+   "name": "Organic Super Sweet Cut Corn",
+   "sku": "129963",
+   "caseCode": "",
+   "aliases": [
+    "Corn Super Sweet Cut Organic"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 2,
+   "order": 201002
+  },
+  {
+   "id": "out-of-this-world-ice-pops",
+   "name": "Out of This World Ice Pops",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Ice Cream",
+   "pos": 12.5,
+   "order": 1012
+  },
+  {
+   "id": "pad-see-ew",
+   "name": "Pad See Ew",
+   "sku": "78052",
+   "caseCode": "",
+   "aliases": [
+    "Pad See Ew Stir Fried Thai Rice"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 5,
+   "order": 201005
+  },
+  {
+   "id": "palak-paneer",
+   "name": "Palak Paneer",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 19.5,
+   "order": 19
+  },
+  {
+   "id": "paneer-tikka-masala",
+   "name": "Paneer Tikka Masala",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 19.5,
+   "order": 19
+  },
+  {
+   "id": "passion-fruit-meringue-tartelettes",
+   "name": "Passion Fruit Meringue Tartelettes",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.5,
+   "order": 1010
+  },
+  {
+   "id": "patagonian-scallops",
+   "name": "Patagonian Scallops",
+   "sku": "281061",
+   "caseCode": "",
+   "aliases": [
+    "Scallops Patagonian"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 13,
+   "order": 201013
+  },
+  {
+   "id": "pesto-pizza",
+   "name": "Pesto Pizza",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Pesto Za"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 16,
+   "order": 1016
+  },
+  {
+   "id": "pie-crusts",
+   "name": "Pie Crusts",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.6,
+   "order": 1010
+  },
+  {
+   "id": "pineapple-coconut-bars",
+   "name": "Pineapple Coconut Bars",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Ice Cream",
+   "pos": 12.5,
+   "order": 1012
+  },
+  {
+   "id": "pineapple-tidbits",
+   "name": "Pineapple Tidbits",
+   "sku": "108869",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 3,
+   "order": 101003
+  },
+  {
+   "id": "pistachio-gelato-style-frozen-dessert",
+   "name": "Pistachio Gelato Style Frozen Dessert",
+   "sku": "83911",
+   "caseCode": "00839112",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 9,
+   "order": 1009
+  },
+  {
+   "id": "pizza-bianca",
+   "name": "Pizza Bianca",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Pizza Bianca"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 14,
+   "order": 1014
+  },
+  {
+   "id": "plum-torte",
+   "name": "Plum Torte",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.5,
+   "order": 1010
+  },
+  {
+   "id": "pork-dumplings",
+   "name": "Pork Dumplings",
+   "sku": "94778",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 6,
+   "order": 201006
+  },
+  {
+   "id": "pot-tacos",
+   "name": "Pot Tacos",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 8,
+   "order": 201008
+  },
+  {
+   "id": "princess-cake",
+   "name": "Princess Cake",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Princess Cake"
+   ],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Desserts",
+   "pos": 3,
+   "order": 3
+  },
+  {
+   "id": "puff-pastry-sheets",
+   "name": "Puff Pastry Sheets",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.6,
+   "order": 1010
+  },
+  {
+   "id": "pumpkin-cheesecake",
+   "name": "Deli Style Cheesecake",
+   "sku": "95409",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Desserts",
+   "pos": 10,
+   "order": 2010
+  },
+  {
+   "id": "pumpkin-ginger-scones",
+   "name": "Pumpkin Ginger Scones",
+   "sku": "76650",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Breakfast",
+   "pos": 30,
+   "order": 30
+  },
+  {
+   "id": "pumpkin-ice-cream",
+   "name": "Pumpkin Ice Cream",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 4,
+   "order": 1004
+  },
+  {
+   "id": "pumpkin-waffles",
+   "name": "Pumpkin Waffles",
+   "sku": "51726",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 22,
+   "order": 1022
+  },
+  {
+   "id": "raspberries",
+   "name": "Raspberries",
+   "sku": "30592",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 1,
+   "order": 201001
+  },
+  {
+   "id": "raw-shrimp",
+   "name": "Raw Shrimp",
+   "sku": "50162",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 13,
+   "order": 201013
+  },
+  {
+   "id": "reduced-fat-mac-cheese",
+   "name": "Reduced Fat Mac & Cheese",
+   "sku": "95141",
+   "caseCode": "",
+   "aliases": [
+    "Mac & Cheese Reduced Fat"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 10,
+   "order": 201010
+  },
+  {
+   "id": "roasted-corn",
+   "name": "Roasted Corn",
+   "sku": "153155",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 3,
+   "order": 101003
+  },
+  {
+   "id": "roasted-garlic-pesto-pizza",
+   "name": "Roasted Garlic & Pesto Pizza",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 16.5,
+   "order": 1016
+  },
+  {
+   "id": "roti-with-thai-red-curry",
+   "name": "Roti with Thai Red Curry",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 19.5,
+   "order": 19
+  },
+  {
+   "id": "rustic-apple-tarte",
+   "name": "Rustic Apple Tarte",
+   "sku": "55201",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Desserts",
+   "pos": 6,
+   "order": 1006
+  },
+  {
+   "id": "s-mores",
+   "name": "S'mores",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "S'mores"
+   ],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Desserts",
+   "pos": 9,
+   "order": 2009
+  },
+  {
+   "id": "salmon-burgers",
+   "name": "Salmon Burgers",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 14,
+   "order": 201014
+  },
+  {
+   "id": "salmon-oak-smoked-pieces",
+   "name": "Salmon Oak Smoked Pieces",
+   "sku": "171117",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 12,
+   "order": 201012
+  },
+  {
+   "id": "salmon-pastrami",
+   "name": "Salmon Pastrami",
+   "sku": "53848",
+   "caseCode": "",
+   "aliases": [
+    "Salmon Pastrami Style Smoked"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Floor",
+   "pos": 13,
+   "order": 201013
+  },
+  {
+   "id": "salted-maple-ice-cream",
+   "name": "Salted Maple Ice Cream",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 2,
+   "order": 1002
+  },
+  {
+   "id": "sausage-pizza",
+   "name": "Pizza Parlanno",
+   "sku": "2517",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 13,
+   "order": 2013
+  },
+  {
+   "id": "seafood-blend",
+   "name": "Seafood Blend",
+   "sku": "9500",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 13,
+   "order": 201013
+  },
+  {
+   "id": "seasoned-waffle-cut-fries",
+   "name": "Seasoned Waffle Cut Fries",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Fries Seasoned Waffle Cut"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 1,
+   "order": 201001
+  },
+  {
+   "id": "shrimp-bao",
+   "name": "Shrimp Bao",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 7,
+   "order": 201007
+  },
+  {
+   "id": "shrimp-gyoza-potstickers",
+   "name": "Shrimp Gyoza Potstickers",
+   "sku": "147944",
+   "caseCode": "",
+   "aliases": [
+    "Gyoza Shrimp Potstickers"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Floor",
+   "pos": 6,
+   "order": 201006
+  },
+  {
+   "id": "shrimp-tempura",
+   "name": "Shrimp Tempura",
+   "sku": "163404",
+   "caseCode": "",
+   "aliases": [
+    "Shrimp Tempura with Soy Dipping"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 14,
+   "order": 201014
+  },
+  {
+   "id": "silver-dollar-pancakes",
+   "name": "Silver Dollar Pancakes",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 25,
+   "order": 1025
+  },
+  {
+   "id": "simit-turkish-sesame-rings",
+   "name": "Simit (Turkish sesame rings)",
+   "sku": "81133",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Breads",
+   "pos": 18,
+   "order": 2018
+  },
+  {
+   "id": "smoked-tuna",
+   "name": "Smoked Tuna",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 12,
+   "order": 201012
+  },
+  {
+   "id": "sockeye-salmon-fillets",
+   "name": "Sockeye Salmon Fillets",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Sockeye"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 15,
+   "order": 201015
+  },
+  {
+   "id": "soup-dumplings-chicken",
+   "name": "Soup Dumplings Chicken",
+   "sku": "54988",
+   "caseCode": "",
+   "aliases": [
+    "Soup Dumplings Chicken"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 4,
+   "order": 201004
+  },
+  {
+   "id": "soup-dumplings-pork-ginger",
+   "name": "Soup Dumplings Pork & Ginger",
+   "sku": "65259",
+   "caseCode": "",
+   "aliases": [
+    "Soup Dumplings Pork and Ginger"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 5,
+   "order": 201005
+  },
+  {
+   "id": "spaghetti-with-meat-and-sauce",
+   "name": "Spaghetti with Meat and Sauce",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Spaghetti with Meat"
+   ],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Pasta",
+   "pos": 22,
+   "order": 22
+  },
+  {
+   "id": "spanakopita",
+   "name": "Spanakopita",
+   "sku": "38028",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Appetizers",
+   "pos": 17,
+   "order": 1017
+  },
+  {
+   "id": "spicy-alfredo",
+   "name": "Spicy Alfredo",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Spicy Alfredo"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Pasta",
+   "pos": 20,
+   "order": 1020
+  },
+  {
+   "id": "spicy-farfalle-with-chicken-sausage",
+   "name": "Spicy Farfalle with Chicken Sausage",
+   "sku": "78523",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Pasta",
+   "pos": 25,
+   "order": 25
+  },
+  {
+   "id": "spicy-peanut-bowl",
+   "name": "Spicy Thai Peanut Bowl",
+   "sku": "76884",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 7,
+   "order": 201007
+  },
+  {
+   "id": "spicy-pork-kimbap",
+   "name": "Spicy Pork Kimbap",
+   "sku": "82112",
+   "caseCode": "",
+   "aliases": [
+    "Kimbap Spicy Pork with Gochujang"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 6,
+   "order": 201006
+  },
+  {
+   "id": "spicy-thai-shrimp-fried-rice",
+   "name": "Spicy Thai Shrimp Fried Rice",
+   "sku": "50304",
+   "caseCode": "",
+   "aliases": [
+    "Fried Rice Shrimp Spicy Thai"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Floor",
+   "pos": 7,
+   "order": 201007
+  },
+  {
+   "id": "steak-stout-pies",
+   "name": "Steak & Stout Pies",
+   "sku": "51959",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 11,
+   "order": 201011
+  },
+  {
+   "id": "steel-cut-oatmeal",
+   "name": "Steel Cut Oatmeal",
+   "sku": "83177",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 24,
+   "order": 1024
+  },
+  {
+   "id": "strawberries-cream-cloud-cake",
+   "name": "Strawberries & Cream Cloud Cake",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.5,
+   "order": 1010
+  },
+  {
+   "id": "strawberry-ice-bars",
+   "name": "Strawberry Lemonade Ice Bars",
+   "sku": "",
+   "caseCode": "00759830",
+   "aliases": [
+    "Straw Ice Bars",
+    "Strawberry Ice Bars"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 12,
+   "order": 1012
+  },
+  {
+   "id": "strawberry-mochi",
+   "name": "Strawberry Mochi",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Straw Mochi"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 10,
+   "order": 1010
+  },
+  {
+   "id": "sublime-ice-cream-sandwiches",
+   "name": "Sublime Ice Cream Sandwiches",
+   "sku": "90987",
+   "caseCode": "0009098770",
+   "aliases": [
+    "Sublime Ice Cream Sandwiches"
+   ],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Ice Cream",
+   "pos": 11,
+   "order": 2011
+  },
+  {
+   "id": "super-sweet-white-corn",
+   "name": "Super Sweet White Corn",
+   "sku": "108990",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 5,
+   "order": 101005
+  },
+  {
+   "id": "sweet-potato-fries",
+   "name": "Sweet Potato Fries",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 3,
+   "order": 101003
+  },
+  {
+   "id": "taiwanese-green-onion-pancakes",
+   "name": "Taiwanese Green Onion Pancakes",
+   "sku": "65545",
+   "caseCode": "",
+   "aliases": [
+    "Pancakes Taiwanese Green Onion"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 4,
+   "order": 201004
+  },
+  {
+   "id": "tandoori-naan",
+   "name": "Tandoori Naan",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breads",
+   "pos": 15.5,
+   "order": 1015
+  },
+  {
+   "id": "tarte-aux-champignons",
+   "name": "Tarte aux Champignons",
+   "sku": "93281",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 14,
+   "order": 2014
+  },
+  {
+   "id": "tarte-d-alsace",
+   "name": "Tarte d'Alsace",
+   "sku": "81279",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 16,
+   "order": 1016
+  },
+  {
+   "id": "teriyaki-chicken-bowl",
+   "name": "Teriyaki Chicken Bowl",
+   "sku": "78275",
+   "caseCode": "",
+   "aliases": [
+    "Bowl Teriyaki Chicken"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 9,
+   "order": 201009
+  },
+  {
+   "id": "tiramisu",
+   "name": "Tiramisu",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "tiramisu"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Desserts",
+   "pos": 7,
+   "order": 1007
+  },
+  {
+   "id": "tiropita",
+   "name": "Tiropita",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Tiropita"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Appetizers",
+   "pos": 19,
+   "order": 1019
+  },
+  {
+   "id": "toaster-waffles",
+   "name": "Toaster Waffles",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Toaster Waffle"
+   ],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 1,
+   "order": 101001
+  },
+  {
+   "id": "tortilla-espa-ola",
+   "name": "Tortilla Española",
+   "sku": "75756",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Appetizers",
+   "pos": 20,
+   "order": 1020
+  },
+  {
+   "id": "tropical-smoothie-blend",
+   "name": "Tropical Smoothie Blend",
+   "sku": "82433",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 2,
+   "order": 101002
+  },
+  {
+   "id": "turkey-burgers",
+   "name": "Turkey Burgers",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 11,
+   "order": 201011
+  },
+  {
+   "id": "turkey-meatballs",
+   "name": "Turkey Meatballs",
+   "sku": "44920",
+   "caseCode": "",
+   "aliases": [
+    "Meatballs Turkey"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 11,
+   "order": 201011
+  },
+  {
+   "id": "turkey-sausage-breakfast-sandwiches",
+   "name": "Turkey Sausage Breakfast Sandwiches",
+   "sku": "70784",
+   "caseCode": "",
+   "aliases": [
+    "Eggwich"
+   ],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Breakfast",
+   "pos": 29,
+   "order": 29
+  },
+  {
+   "id": "u1",
+   "name": "Vegetable Tikka Samosas",
+   "sku": "61534",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Ice Cream",
+   "pos": 19,
+   "order": 19
+  },
+  {
+   "id": "u10",
+   "name": "Apple Pie ala mode",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 2,
+   "order": 1002
+  },
+  {
+   "id": "u11",
+   "name": "All Mixed Up",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 2,
+   "order": 1002
+  },
+  {
+   "id": "ube-mochi",
+   "name": "Ube Mochi",
+   "sku": "170805",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 6,
+   "order": 1006
+  },
+  {
+   "id": "ultra-chocolate-ice-cream",
+   "name": "Ultra Chocolate Ice Cream",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 3,
+   "order": 1003
+  },
+  {
+   "id": "vanilla-ice-cream-bon-bons",
+   "name": "Vanilla Ice Cream Bon Bons",
+   "sku": "86986",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 11,
+   "order": 1011
+  },
+  {
+   "id": "vanilla-mochi",
+   "name": "Vanilla Mochi",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 10,
+   "order": 1010
+  },
+  {
+   "id": "vegan-thai-green-curry",
+   "name": "Vegan Thai Green Curry",
+   "sku": "70789",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 6,
+   "order": 201006
+  },
+  {
+   "id": "vegan-tikka-masala",
+   "name": "Vegan Tikka Masala",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 19.5,
+   "order": 19
+  },
+  {
+   "id": "vegan-tofu-vegetable-kimbap",
+   "name": "Vegan Tofu & Vegetable Kimbap",
+   "sku": "76023",
+   "caseCode": "",
+   "aliases": [
+    "Kimbap Korean Seaweed Rice"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 7,
+   "order": 201007
+  },
+  {
+   "id": "vegetable-bird-s-nests",
+   "name": "Vegetable Bird's Nests",
+   "sku": "50378",
+   "caseCode": "00503785",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Appetizers",
+   "pos": 17,
+   "order": 2017
+  },
+  {
+   "id": "vegetable-biryani",
+   "name": "Vegetable Biryani",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 19.5,
+   "order": 19
+  },
+  {
+   "id": "vegetable-fried-rice",
+   "name": "Vegetable Fried Rice",
+   "sku": "152148",
+   "caseCode": "",
+   "aliases": [
+    "Fried Rice Vegetable"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 9,
+   "order": 201009
+  },
+  {
+   "id": "vegetable-pad-thai",
+   "name": "Vegetable Pad Thai",
+   "sku": "94404",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 2,
+   "order": 201002
+  },
+  {
+   "id": "vegetable-spring-rolls",
+   "name": "Vegetable Spring Rolls",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Spring Roll",
+    "Veg Spring Roll"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 4,
+   "order": 201004
+  },
+  {
+   "id": "very-veggie-variety",
+   "name": "Verdant Veggie Variety",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 3,
+   "order": 101003
+  },
+  {
+   "id": "whole-grain-waffles",
+   "name": "Whole Grain Waffles",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 22,
+   "order": 1022
+  },
+  {
+   "id": "wild-blueberries",
+   "name": "Wild Blueberries",
+   "sku": "181780",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 4,
+   "order": 101004
+  }
+ ]
+}
