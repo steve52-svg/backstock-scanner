@@ -296,7 +296,7 @@ fun FoundScreen(state: AppState, onBack: () -> Unit) {
                     Text("Careful reading", color = Color.White)
                     Text("Reads each photo in quarters too. Catches smaller writing; a few seconds slower.", color = Color.White.copy(alpha = 0.5f), fontSize = 11.sp)
                 }
-                Switch(checked = state.careful, onCheckedChange = { state.setCareful(it) })
+                Switch(checked = state.careful, onCheckedChange = { state.updateCareful(it) })
             }
             Spacer(Modifier.weight(1f))
             TextButton(onClick = { confirmForget = true }) { Text("Forget everything it learned", color = Color(0xFFFF8A80), fontSize = 12.sp) }

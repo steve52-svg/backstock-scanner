@@ -70,7 +70,7 @@ class AppState(private val context: Context) {
     private val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     var careful by mutableStateOf(prefs.getBoolean("careful", true))
         private set
-    fun setCareful(v: Boolean) { careful = v; prefs.edit().putBoolean("careful", v).apply() }
+    fun updateCareful(v: Boolean) { careful = v; prefs.edit().putBoolean("careful", v).apply() }
 
     /** Handwritten labels saved for training a phone model later. */
     var trainingCount by mutableIntStateOf(prefs.getInt("trainingCount", 0))
