@@ -62,6 +62,7 @@ class Scanner(private val matcher: Matcher, private val learned: Learned) {
             val codes = barcodeReader.process(InputImage.fromBitmap(bmp, 0)).await()
             for (b in codes) {
                 val raw = b.rawValue ?: continue
+                if (learned.isIgnoredCode(raw)) continue
                 val r = b.boundingBox ?: continue
                 val g = matcher.guessBarcode(raw)
                 val level = when { g == null -> Level.UNKNOWN; g.score >= 0.95f -> Level.SURE; else -> Level.GUESS }

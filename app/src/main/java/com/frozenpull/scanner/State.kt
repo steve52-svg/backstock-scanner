@@ -134,9 +134,18 @@ class AppState(private val context: Context) {
     }
 
     suspend fun ignore(photo: ScanPhoto, det: Detection) {
-        if (!det.isBarcode) learned.ignore(det.text)
+        if (det.isBarcode) learned.ignoreCode(det.text) else learned.ignore(det.text)
         matcher.rebuild()
         photo.detections.removeAll { it.id == det.id }
+        recount(photo)
+        withContext(Dispatchers.Default) { rematchAll() }
+    }
+
+    /** Puts back a label that was marked not relevant by mistake. */
+    suspend fun unignore(photo: ScanPhoto, det: Detection) {
+        learned.unignore(det.text, det.isBarcode)
+        matcher.rebuild()
+        if (photo.detections.none { it.id == det.id }) photo.detections += det
         recount(photo)
         withContext(Dispatchers.Default) { rematchAll() }
     }

@@ -61,5 +61,15 @@ class Learned(context: Context) {
         save()
     }
 
+    /** Barcodes marked not relevant are kept as "#<code>" so they can't clash with label text. */
+    fun ignoreCode(code: String) { ignored += "#$code"; save() }
+    fun isIgnoredCode(code: String) = "#$code" in ignored
+
+    /** Undo for "Not relevant". */
+    fun unignore(text: String, isBarcode: Boolean) {
+        if (isBarcode) ignored -= "#$text" else ignored -= Text.norm(text)
+        save()
+    }
+
     fun clear() { writings.clear(); codes.clear(); ignored.clear(); save() }
 }

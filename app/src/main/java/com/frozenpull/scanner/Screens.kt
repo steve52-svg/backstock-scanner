@@ -46,6 +46,16 @@ fun ResultsScreen(state: AppState, index: Int, onIndex: (Int) -> Unit, onBack: (
     var open by remember { mutableStateOf<Detection?>(null) }
     var showUnread by remember { mutableStateOf(true) }
     var note by remember { mutableStateOf("") }
+    /** The last label marked not relevant, so it can be undone. */
+    var lastHidden by remember { mutableStateOf<Detection?>(null) }
+    val scope = rememberCoroutineScope()
+    fun notRelevant(d: Detection) {
+        scope.launch {
+            state.ignore(photo, d)
+            lastHidden = d
+            note = "Hidden \"${d.text.take(30)}\" — it won't show again"
+        }
+    }
     val dets = photo.detections.filter { showUnread || it.level != Level.UNKNOWN || it.confirmed }
 
     Row(Modifier.fillMaxSize()) {
@@ -73,7 +83,14 @@ fun ResultsScreen(state: AppState, index: Int, onIndex: (Int) -> Unit, onBack: (
                 Spacer(Modifier.weight(1f))
                 Switch(checked = showUnread, onCheckedChange = { showUnread = it })
             }
-            if (note.isNotEmpty()) Text(note, color = Sure, fontSize = 13.sp)
+            if (note.isNotEmpty()) Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(note, color = Sure, fontSize = 13.sp, modifier = Modifier.weight(1f))
+                lastHidden?.let { h ->
+                    TextButton(onClick = {
+                        scope.launch { state.unignore(photo, h); lastHidden = null; note = "Put back \"${h.text.take(30)}\"" }
+                    }) { Text("Undo", color = Maybe) }
+                }
+            }
             Text("Tap a label to fix it or teach it.", color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp)
             LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 items(dets, key = { it.id }) { d ->
@@ -94,6 +111,7 @@ fun ResultsScreen(state: AppState, index: Int, onIndex: (Int) -> Unit, onBack: (
                                 color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
                             )
                         }
+                        if (!d.confirmed) NotRelevantButton(small = true) { notRelevant(d) }
                     }
                 }
             }
@@ -102,8 +120,21 @@ fun ResultsScreen(state: AppState, index: Int, onIndex: (Int) -> Unit, onBack: (
     }
 
     open?.let { d ->
-        DetectionSheet(state, photo, d, onClose = { open = null }, onNote = { note = it })
+        DetectionSheet(state, photo, d, onClose = { open = null }, onNote = { note = it; lastHidden = null },
+            onNotRelevant = { open = null; notRelevant(d) })
     }
+}
+
+/** Hides a label that isn't a product (printing, stickers, a cart number…) and stops showing it. */
+@Composable
+fun NotRelevantButton(small: Boolean = false, onClick: () -> Unit) {
+    val red = Color(0xFFFF8A80)
+    OutlinedButton(
+        onClick = onClick,
+        border = androidx.compose.foundation.BorderStroke(1.dp, red),
+        contentPadding = if (small) PaddingValues(horizontal = 8.dp, vertical = 0.dp) else ButtonDefaults.ContentPadding,
+        modifier = if (small) Modifier.height(32.dp) else Modifier,
+    ) { Text("Not relevant", color = red, fontSize = if (small) 12.sp else 14.sp) }
 }
 
 @Composable
@@ -159,7 +190,10 @@ private fun PhotoView(state: AppState, photo: ScanPhoto, dets: List<Detection>, 
 // ───────────────────────── Fix / teach one label ─────────────────────────
 
 @Composable
-fun DetectionSheet(state: AppState, photo: ScanPhoto, det: Detection, onClose: () -> Unit, onNote: (String) -> Unit) {
+fun DetectionSheet(
+    state: AppState, photo: ScanPhoto, det: Detection,
+    onClose: () -> Unit, onNote: (String) -> Unit, onNotRelevant: () -> Unit,
+) {
     val scope = rememberCoroutineScope()
     var crop by remember(det.id) { mutableStateOf<Bitmap?>(null) }
     LaunchedEffect(det.id) { crop = withContext(Dispatchers.IO) { state.cropOf(photo, det) } }
@@ -196,8 +230,9 @@ fun DetectionSheet(state: AppState, photo: ScanPhoto, det: Detection, onClose: (
             }
             Column(Modifier.width(360.dp).fillMaxHeight().background(Panel, RoundedCornerShape(10.dp)).padding(10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("What is this box?", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text("What is this?", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.weight(1f))
+                    NotRelevantButton { if (!working) onNotRelevant() }
                     TextButton(onClick = onClose) { Text("Close", color = Color.White) }
                 }
                 if (query.isBlank()) {
@@ -230,9 +265,6 @@ fun DetectionSheet(state: AppState, photo: ScanPhoto, det: Detection, onClose: (
                     Checkbox(checked = handwritten, onCheckedChange = { handwritten = it })
                     Text("Handwritten — save it for training", color = Color.White, fontSize = 13.sp)
                 }
-                TextButton(onClick = {
-                    if (!working) { working = true; scope.launch { state.ignore(photo, det); onNote("Got it — it'll skip \"${det.text.take(30)}\" from now on"); onClose() } }
-                }) { Text("Not a product label — stop showing this", color = Color(0xFFFF8A80)) }
             }
         }
     }
@@ -285,7 +317,7 @@ fun FoundScreen(state: AppState, onBack: () -> Unit) {
             Text("What it has learned", color = Color.White, fontWeight = FontWeight.Bold)
             Text(
                 "${state.learned.writings.size} handwritten names\n${state.learned.codes.size} barcodes\n" +
-                    "${state.learned.ignored.size} printed words it skips\n${state.trainingCount} label pictures saved for training",
+                    "${state.learned.ignored.size} labels marked not relevant\n${state.trainingCount} label pictures saved for training",
                 color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp,
             )
             OutlinedButton(onClick = { share(ctx, "Back Stock Scanner learned data", state.learnedJson()) }, modifier = Modifier.fillMaxWidth()) {
