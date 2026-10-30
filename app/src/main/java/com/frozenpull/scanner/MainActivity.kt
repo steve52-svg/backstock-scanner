@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.net.Uri
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -46,12 +47,40 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val state = Holder.get(applicationContext)
+        takeSharedList(intent)
         setContent {
             MaterialTheme(colorScheme = darkColorScheme(primary = Color(0xFF2ECC71), secondary = Color(0xFFF5B041))) {
                 CameraPermissionGate { AppRoot(state) }
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        takeSharedList(intent)
+    }
+
+    /** A pull list shared to the app (Share → Back Stock Scanner) opens straight into hands-free. */
+    private fun takeSharedList(i: Intent?) {
+        if (i?.action != Intent.ACTION_SEND) return
+        val text = i.getStringExtra(Intent.EXTRA_TEXT) ?: return
+        val state = Holder.get(applicationContext)
+        if (state.pullRun.load(text) > 0) state.openHandsFree = true
+        setIntent(Intent(this, MainActivity::class.java))
+    }
+
+    // Volume keys (and a headset button) drive hands-free pulling while it's open.
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        val h = KeyBus.handler
+        if (h != null && isHandsFreeKey(keyCode)) { if ((event?.repeatCount ?: 0) == 0) h(keyCode); return true }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean =
+        if (KeyBus.handler != null && isHandsFreeKey(keyCode)) true else super.onKeyUp(keyCode, event)
+
+    private fun isHandsFreeKey(k: Int) = k == KeyEvent.KEYCODE_VOLUME_DOWN || k == KeyEvent.KEYCODE_VOLUME_UP ||
+        k == KeyEvent.KEYCODE_HEADSETHOOK || k == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
 }
 
 /** Keeps the scan session alive for as long as the app is running. */
@@ -60,7 +89,7 @@ object Holder {
     fun get(ctx: Context): AppState = state ?: AppState(ctx).also { state = it }
 }
 
-const val APP_VERSION = "0.5"
+const val APP_VERSION = "0.6"
 
 val Sure = Color(0xFF2ECC71)
 val Maybe = Color(0xFFF5B041)
@@ -97,7 +126,7 @@ private fun CameraPermissionGate(content: @Composable () -> Unit) {
     }
 }
 
-enum class Screen { CAMERA, RESULTS, FOUND, ROUTE }
+enum class Screen { CAMERA, RESULTS, FOUND, ROUTE, HANDSFREE }
 
 @Composable
 fun AppRoot(state: AppState) {
@@ -126,6 +155,9 @@ fun AppRoot(state: AppState) {
     val openGallery = { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
 
     BackHandler(enabled = screen != Screen.CAMERA) { screen = Screen.CAMERA }
+    LaunchedEffect(state.openHandsFree) {
+        if (state.openHandsFree) { screen = Screen.HANDSFREE; state.openHandsFree = false }
+    }
 
     Box(Modifier.fillMaxSize().background(Bg)) {
         when (screen) {
@@ -135,6 +167,7 @@ fun AppRoot(state: AppState) {
                 onGallery = openGallery,
                 onFound = { screen = Screen.FOUND },
                 onRoute = { screen = Screen.ROUTE },
+                onHandsFree = { screen = Screen.HANDSFREE },
                 onResults = { photoIndex = state.photos.lastIndex; screen = Screen.RESULTS },
             )
             Screen.RESULTS -> ResultsScreen(
@@ -144,6 +177,7 @@ fun AppRoot(state: AppState) {
                 onFound = { screen = Screen.FOUND },
             )
             Screen.FOUND -> FoundScreen(state, onBack = { screen = Screen.CAMERA })
+            Screen.HANDSFREE -> HandsFreeScreen(state, onBack = { screen = Screen.CAMERA })
             Screen.ROUTE -> com.frozenpull.camera.WalkInSection(
                 onExit = { screen = Screen.CAMERA },
                 onRead = { uris, labels -> scanAll(uris) { labels.getOrElse(it) { "Walk-in photo" } } },
@@ -169,6 +203,7 @@ fun CameraScreen(
     onGallery: () -> Unit,
     onFound: () -> Unit,
     onRoute: () -> Unit,
+    onHandsFree: () -> Unit,
     onResults: () -> Unit,
 ) {
     val ctx = LocalContext.current
@@ -240,6 +275,10 @@ fun CameraScreen(
                 onClick = onRoute, enabled = !busy, modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Maybe, contentColor = Color.Black),
             ) { Text("Walk-in route", fontWeight = FontWeight.Bold) }
+            Button(
+                onClick = onHandsFree, enabled = !busy, modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4FC0CC), contentColor = Color.Black),
+            ) { Text("Hands-free pull", fontWeight = FontWeight.Bold) }
             OutlinedButton(onClick = onGallery, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text("Scan photos", color = Color.White) }
             OutlinedButton(onClick = onFound, modifier = Modifier.fillMaxWidth()) { Text("Found (${state.found.items.size})", color = Color.White) }
             if (state.photos.isNotEmpty()) {
