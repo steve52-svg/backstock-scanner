@@ -61,6 +61,15 @@ class PullRun(context: Context) {
         return parsed.size
     }
 
+    /** Start over: same list, every item back to not done, back to the first one. */
+    fun restart() {
+        for (i in items.indices) if (items[i].status != PullStatus.TODO) items[i] = items[i].copy(status = PullStatus.TODO)
+        index = 0; save()
+    }
+
+    /** Clear all: forget the list entirely. */
+    fun clear() { items.clear(); index = 0; save() }
+
     fun set(i: Int, s: PullStatus) {
         if (i !in items.indices) return
         items[i] = items[i].copy(status = s); save()

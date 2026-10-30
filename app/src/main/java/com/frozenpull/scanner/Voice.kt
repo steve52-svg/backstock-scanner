@@ -72,6 +72,16 @@ class Voice(
         if (on) { if (!speaking) listen() } else { stopRec(); onStatus("Voice off") }
     }
 
+    /** Stops talking and listening right away. */
+    fun hush() {
+        listening = false
+        pending = null
+        stopRec()
+        try { tts?.stop() } catch (_: Exception) { }
+        speaking = false
+        onStatus("Voice off")
+    }
+
     fun shutdown() {
         listening = false
         main.removeCallbacksAndMessages(null)

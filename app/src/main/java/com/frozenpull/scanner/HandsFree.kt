@@ -8,6 +8,8 @@ import android.view.KeyEvent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -50,6 +52,7 @@ fun HandsFreeScreen(state: AppState, onBack: () -> Unit) {
     var note by remember { mutableStateOf("") }
     var listen by remember { mutableStateOf(false) }
     var talk by remember { mutableStateOf(true) }
+    var confirm by remember { mutableStateOf<String?>(null) }
 
     // Where each product sits, from the catalog (falls back to the list's section heading).
     fun whereOf(it: PullItem): String {
@@ -129,13 +132,22 @@ fun HandsFreeScreen(state: AppState, onBack: () -> Unit) {
     val green = Color(0xFF2ECC71); val red = Color(0xFFE5534B)
     Column(Modifier.fillMaxSize().background(Bg).padding(10.dp)) {
         // Top bar
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             TextButton(onClick = onBack) { Text("‹ Scanner", color = Color.White) }
             FilterChip(selected = listen, onClick = { toggleListen() }, label = { Text(if (listen) "Voice: on" else "Voice: off") })
             FilterChip(selected = talk, onClick = { talk = !talk; voice.talk = talk }, label = { Text(if (talk) "Read aloud" else "Silent") })
-            Spacer(Modifier.weight(1f))
             OutlinedButton(onClick = { pasteList() }) { Text("Paste pull list", color = Color.White) }
             OutlinedButton(onClick = { copyResults() }, enabled = run.pulled + run.cant > 0) { Text("Copy results", color = Color.White) }
+            val warn = Color(0xFFFF8A80)
+            OutlinedButton(onClick = { confirm = "restart" }, enabled = run.items.isNotEmpty()) { Text("Start over", color = Color.White) }
+            OutlinedButton(onClick = {
+                // Cancel all: stop reading and listening right now and leave hands-free. The list and marks are kept.
+                listen = false; voice.hush(); onBack()
+            }) { Text("Cancel all", color = warn) }
+            OutlinedButton(onClick = { confirm = "clear" }, enabled = run.items.isNotEmpty()) { Text("Clear all", color = warn) }
         }
         val line = listOf(note, if (listen) status else "").filter { it.isNotBlank() }.joinToString("  ·  ")
         Text(line.ifEmpty { "Volume down = Pulled · Volume up = Can't find · or turn on Voice and say Pulled, Can't find, Next, Back, Repeat" },
@@ -194,5 +206,27 @@ fun HandsFreeScreen(state: AppState, onBack: () -> Unit) {
                 }
             }
         }
+    }
+
+    when (confirm) {
+        "restart" -> AlertDialog(
+            onDismissRequest = { confirm = null },
+            title = { Text("Start over?") },
+            text = { Text("Every item goes back to not done and it starts again from the first one. The list stays.") },
+            confirmButton = { TextButton(onClick = {
+                confirm = null; run.restart(); note = "Started over."
+                voice.speak("Starting over. ${run.items.size} items. First: ${sayItem(0)}")
+            }) { Text("Start over") } },
+            dismissButton = { TextButton(onClick = { confirm = null }) { Text("Cancel") } },
+        )
+        "clear" -> AlertDialog(
+            onDismissRequest = { confirm = null },
+            title = { Text("Clear all?") },
+            text = { Text("Removes this pull list and its Pulled / Can't find marks from the app. Copy results first if you still need them.") },
+            confirmButton = { TextButton(onClick = {
+                confirm = null; listen = false; voice.hush(); run.clear(); note = "List cleared. Paste a new pull list to start."
+            }) { Text("Clear all", color = Color(0xFFE5534B)) } },
+            dismissButton = { TextButton(onClick = { confirm = null }) { Text("Cancel") } },
+        )
     }
 }
