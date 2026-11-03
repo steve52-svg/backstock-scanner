@@ -114,7 +114,7 @@ class Matcher(private val catalog: Catalog, private val learned: Learned) {
         if (n.isBlank()) return emptyList()
         // SKU printed on the box ("SKU# 054321").
         Regex("SKU\\s*#?\\s*:?\\s*0*(\\d{4,6})").find(n)?.groupValues?.get(1)?.let { sku ->
-            catalog.products.firstOrNull { it.sku == sku }?.let { return listOf(Guess(it, 1f, "SKU $sku")) }
+            catalog.products.firstOrNull { sku in it.allSkus }?.let { return listOf(Guess(it, 1f, "SKU $sku")) }
         }
         learned.writings[n]?.let { id -> catalog[id]?.let { return listOf(Guess(it, 1f, "you taught it")) } }
         val toks = Text.tokens(n)
@@ -136,19 +136,19 @@ class Matcher(private val catalog: Catalog, private val learned: Learned) {
         val d = raw.filter(Char::isDigit)
         if (d.isEmpty()) return null
         catalog.products.firstOrNull { it.caseCode.isNotEmpty() && it.caseCode == d }?.let { return Guess(it, 1f, "case code") }
-        val skus = catalog.products.filter { it.sku.length >= 4 }
+        val skus = catalog.products.filter { it.allSkus.isNotEmpty() }
         // 8-digit case codes: 0 + 6-digit SKU + check digit (00990325 -> 99032).
         if (d.length == 8) {
             val sku = d.substring(1, 7).trimStart('0')
-            skus.firstOrNull { it.sku == sku }?.let { return Guess(it, 1f, "SKU $sku in barcode") }
+            skus.firstOrNull { sku in it.allSkus }?.let { return Guess(it, 1f, "SKU $sku in barcode") }
         }
         // GTIN with the Trader Joe's prefix: the SKU follows it.
         val i = d.indexOf("30112")
         if (i >= 0 && d.length >= i + 5 + 5) {
             val sku = d.substring(i + 5, i + 10).trimStart('0')
-            skus.firstOrNull { it.sku == sku }?.let { return Guess(it, 0.95f, "SKU $sku in barcode") }
+            skus.firstOrNull { sku in it.allSkus }?.let { return Guess(it, 0.95f, "SKU $sku in barcode") }
         }
-        skus.filter { it.sku.length >= 5 && d.contains(it.sku) }.singleOrNull()?.let { return Guess(it, 0.85f, "SKU ${it.sku} in barcode") }
+        skus.filter { p -> p.allSkus.any { it.length >= 5 && d.contains(it) } }.singleOrNull()?.let { return Guess(it, 0.85f, "SKU ${it.sku} in barcode") }
         return null
     }
 
@@ -156,7 +156,7 @@ class Matcher(private val catalog: Catalog, private val learned: Learned) {
     fun search(q: String, limit: Int = 30): List<Product> {
         val n = Text.norm(q)
         if (n.isBlank()) return catalog.products.sortedBy { it.name }.take(limit)
-        val contains = catalog.products.filter { p -> Text.norm(p.name).contains(n) || p.aliases.any { Text.norm(it).contains(n) } || p.sku == n }
+        val contains = catalog.products.filter { p -> Text.norm(p.name).contains(n) || p.aliases.any { Text.norm(it).contains(n) } || n.trimStart('0') in p.allSkus }
         val fuzzy = guessText(q, limit).map { it.product }
         return (contains + fuzzy).distinctBy { it.id }.take(limit)
     }

@@ -17,7 +17,11 @@ data class Product(
     /** Sort key: walk-in order (left shelf, back wall, right shelf, front wall), then row and spot. */
     val order: Int,
     val custom: Boolean = false,
+    /** Other SKUs the same product ships under (from traderjoes.com). */
+    val otherSkus: List<String> = emptyList(),
 ) {
+    /** Every SKU for this product, without leading zeros. */
+    val allSkus: List<String> get() = (listOf(sku) + otherSkus).map { it.trimStart('0') }.filter { it.length >= 4 }
     val place: String get() = listOf(shelf, if (row.isNotBlank()) "$row row" else "").filter { it.isNotBlank() }.joinToString(" · ")
 }
 
@@ -59,6 +63,7 @@ class Catalog(private val context: Context) {
     private fun parse(arr: JSONArray, custom: Boolean): List<Product> = (0 until arr.length()).map { i ->
         val o = arr.getJSONObject(i)
         val al = o.optJSONArray("aliases")
+        val sk = o.optJSONArray("skus")
         Product(
             id = o.getString("id"),
             name = o.getString("name"),
@@ -70,6 +75,7 @@ class Catalog(private val context: Context) {
             section = o.optString("section", ""),
             order = o.optInt("order", 900000),
             custom = custom,
+            otherSkus = if (sk == null) emptyList() else (0 until sk.length()).map { sk.getString(it) },
         )
     }
 }
