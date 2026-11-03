@@ -93,7 +93,7 @@ object Holder {
     fun get(ctx: Context): AppState = state ?: AppState(ctx).also { state = it }
 }
 
-const val APP_VERSION = "1.1"
+const val APP_VERSION = "1.2"
 
 val Sure = Color(0xFF2ECC71)
 val Maybe = Color(0xFFF5B041)
@@ -134,7 +134,7 @@ private fun CameraPermissionGate(content: @Composable () -> Unit) {
     }
 }
 
-enum class Screen { CAMERA, RESULTS, FOUND, ROUTE, HANDSFREE, PULL }
+enum class Screen { CAMERA, RESULTS, FOUND, ROUTE, HANDSFREE, PULL, LIVE }
 
 @Composable
 fun AppRoot(state: AppState) {
@@ -176,6 +176,7 @@ fun AppRoot(state: AppState) {
                 onFound = { screen = Screen.FOUND },
                 onRoute = { screen = Screen.ROUTE },
                 onHandsFree = { screen = Screen.PULL },
+                onLive = { screen = Screen.LIVE },
                 onResults = { photoIndex = state.photos.lastIndex; screen = Screen.RESULTS },
             )
             Screen.RESULTS -> ResultsScreen(
@@ -185,6 +186,7 @@ fun AppRoot(state: AppState) {
                 onFound = { screen = Screen.FOUND },
             )
             Screen.FOUND -> FoundScreen(state, onBack = { screen = Screen.CAMERA })
+            Screen.LIVE -> LiveScreen(state, onBack = { screen = Screen.CAMERA })
             Screen.HANDSFREE -> HandsFreeScreen(state, onBack = { screen = Screen.PULL })
             Screen.PULL -> PullScreen(state, onBack = { screen = Screen.CAMERA }, onHandsFree = { screen = Screen.HANDSFREE })
             Screen.ROUTE -> com.frozenpull.camera.WalkInSection(
@@ -213,6 +215,7 @@ fun CameraScreen(
     onFound: () -> Unit,
     onRoute: () -> Unit,
     onHandsFree: () -> Unit,
+    onLive: () -> Unit,
     onResults: () -> Unit,
 ) {
     val ctx = LocalContext.current
@@ -292,6 +295,7 @@ fun CameraScreen(
                 modifier = Modifier.size(84.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = T.accent, contentColor = T.bg),
             ) { Text(if (shooting) "…" else "Scan", style = Type.title.copy(fontSize = 22.sp)) }
+            PageButton("Live view", onLive, kind = Btn.DARK, enabled = !busy, modifier = Modifier.fillMaxWidth())
             PageButton("Pull list", onHandsFree, kind = Btn.ACCENT, enabled = !busy, modifier = Modifier.fillMaxWidth())
             PageButton("Walk-in route", onRoute, kind = Btn.ACCENT, enabled = !busy, modifier = Modifier.fillMaxWidth())
             PageButton("Scan photos", onGallery, enabled = !busy, modifier = Modifier.fillMaxWidth())

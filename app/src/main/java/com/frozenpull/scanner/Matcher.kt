@@ -57,10 +57,16 @@ class Matcher(private val catalog: Catalog, private val learned: Learned) {
 
     private var cands: List<Cand> = emptyList()
 
+    /** The live view reads the same labels many times a second; remember recent answers. */
+    private val cache = object : LinkedHashMap<String, List<Guess>>(512, 0.75f, true) {
+        override fun removeEldestEntry(e: MutableMap.MutableEntry<String, List<Guess>>?) = size > 3000
+    }
+
     init { rebuild() }
 
     /** Call after the catalog or learned data changes. */
     fun rebuild() {
+        synchronized(cache) { cache.clear() }
         val out = mutableListOf<Cand>()
         fun add(p: Product, s: String, w: Float, why: String) {
             val t = Text.tokens(s)
@@ -96,6 +102,14 @@ class Matcher(private val catalog: Catalog, private val learned: Learned) {
 
     /** Best few products for a piece of label text, most likely first. */
     fun guessText(raw: String, limit: Int = 5): List<Guess> {
+        val key = Text.norm(raw) + "|" + limit
+        synchronized(cache) { cache[key] }?.let { return it }
+        val r = guessTextUncached(raw, limit)
+        synchronized(cache) { cache[key] = r }
+        return r
+    }
+
+    private fun guessTextUncached(raw: String, limit: Int): List<Guess> {
         val n = Text.norm(raw)
         if (n.isBlank()) return emptyList()
         // SKU printed on the box ("SKU# 054321").

@@ -90,6 +90,9 @@ class Scanner(private val matcher: Matcher, private val learned: Learned) {
         return out
     }
 
+    /** For the live view: matches one block of text lines (boxes in any coordinates) to products. */
+    fun matchLines(lines: List<Piece>): List<Detection> { var n = 0; return matchBlock(lines) { n++ } }
+
     /** Picks the products in one block of text lines; leftover lines become an "unknown" label. */
     private fun matchBlock(lines: List<Piece>, newId: () -> Int): List<Detection> {
         val out = mutableListOf<Detection>()
