@@ -5288,6 +5288,476 @@
    "pos": 99,
    "order": 900515,
    "source": "walk-in"
+  },
+  {
+   "id": "12-classic-lemon-bars",
+   "name": "12 Classic Lemon Bars",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.5,
+   "order": 1010
+  },
+  {
+   "id": "12-sweet-bites",
+   "name": "12 Sweet Bites",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "12 Sweet Bites"
+   ],
+   "shelf": "Left shelf",
+   "row": "Bottom",
+   "section": "Desserts",
+   "pos": 8,
+   "order": 2008
+  },
+  {
+   "id": "2-affogatos",
+   "name": "2 Affogatos",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Ice Cream",
+   "pos": 12.5,
+   "order": 1012
+  },
+  {
+   "id": "beef-meatballs-party-size",
+   "name": "Beef Meatballs (party size)",
+   "sku": "77262",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Appetizers",
+   "pos": 14,
+   "order": 1014
+  },
+  {
+   "id": "beef-shepherd-s-pie",
+   "name": "Beef Shepherd's Pie",
+   "sku": "36260",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 13,
+   "order": 201013
+  },
+  {
+   "id": "belgian-waffles",
+   "name": "Belgian Waffles",
+   "sku": "96967",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 25,
+   "order": 1025
+  },
+  {
+   "id": "brazilian-style-cheese-bread",
+   "name": "Brazilian Style Cheese Bread",
+   "sku": "64355",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breads",
+   "pos": 18,
+   "order": 1018
+  },
+  {
+   "id": "breaded-fried-ravioli",
+   "name": "Breaded Fried Ravioli",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Appetizers",
+   "pos": 20.5,
+   "order": 1020
+  },
+  {
+   "id": "burger-shrimp",
+   "name": "Burger Shrimp",
+   "sku": "57733",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 13,
+   "order": 201013
+  },
+  {
+   "id": "burrito-bowl",
+   "name": "Burrito Bowl",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 9,
+   "order": 201009
+  },
+  {
+   "id": "channa-masala",
+   "name": "Channa Masala",
+   "sku": "99144",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 15,
+   "order": 15
+  },
+  {
+   "id": "cheese-blintzes",
+   "name": "Cheese Blintzes",
+   "sku": "99385",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 21,
+   "order": 1021
+  },
+  {
+   "id": "cherry-berry-blend",
+   "name": "Cherry Berry Blend",
+   "sku": "159757",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 4,
+   "order": 101004
+  },
+  {
+   "id": "chocolate-covered-bananas",
+   "name": "Chocolate Covered Bananas",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 5,
+   "order": 1005
+  },
+  {
+   "id": "fish-sticks",
+   "name": "Fish Sticks",
+   "sku": "98967",
+   "caseCode": "",
+   "aliases": [
+    "Fish Sticks Breaded"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Top row",
+   "pos": 12,
+   "order": 201012
+  },
+  {
+   "id": "french-macarons",
+   "name": "French Macarons",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.5,
+   "order": 1010
+  },
+  {
+   "id": "fruit-frenzy-bars",
+   "name": "Fruit Frenzy Bars",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Ice Cream",
+   "pos": 12.5,
+   "order": 1012
+  },
+  {
+   "id": "gluten-free-pie-shells",
+   "name": "Gluten Free Pie Shells",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Desserts",
+   "pos": 10.6,
+   "order": 1010
+  },
+  {
+   "id": "gluten-free-waffles",
+   "name": "Gluten Free Waffles",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "gluten free waffle"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 23,
+   "order": 1023
+  },
+  {
+   "id": "gnocchi-alla-sorrentina",
+   "name": "Gnocchi alla Sorrentina",
+   "sku": "31890",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Pasta",
+   "pos": 21,
+   "order": 21
+  },
+  {
+   "id": "hatch-chile-chicken-wraps",
+   "name": "Hatch Chile Chicken Wraps",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Appetizers",
+   "pos": 20.5,
+   "order": 1020
+  },
+  {
+   "id": "holiday-pumpkin-pie",
+   "name": "Holiday Pumpkin Pie",
+   "sku": "165222",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Front wall",
+   "row": "",
+   "section": "Front wall",
+   "pos": 4,
+   "order": 301004
+  },
+  {
+   "id": "kibbeh",
+   "name": "Kibbeh",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "",
+   "section": "Appetizers",
+   "pos": 20.5,
+   "order": 1020
+  },
+  {
+   "id": "linguine-with-pesto-tomato",
+   "name": "Linguine with Pesto & Tomato",
+   "sku": "50469",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Pasta",
+   "pos": 24,
+   "order": 24
+  },
+  {
+   "id": "organic-foursome",
+   "name": "Organic Foursome",
+   "sku": "90867",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Back wall",
+   "row": "",
+   "section": "Fruit & Vegetables",
+   "pos": 4,
+   "order": 101004
+  },
+  {
+   "id": "palak-paneer",
+   "name": "Palak Paneer",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 19.5,
+   "order": 19
+  },
+  {
+   "id": "pesto-pizza",
+   "name": "Pesto Pizza",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [
+    "Pesto Za"
+   ],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Pizza, Tartes & Flatbreads",
+   "pos": 16,
+   "order": 1016
+  },
+  {
+   "id": "pot-tacos",
+   "name": "Pot Tacos",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Bottom row",
+   "pos": 8,
+   "order": 201008
+  },
+  {
+   "id": "pumpkin-ginger-scones",
+   "name": "Pumpkin Ginger Scones",
+   "sku": "76650",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Breakfast",
+   "pos": 30,
+   "order": 30
+  },
+  {
+   "id": "pumpkin-waffles",
+   "name": "Pumpkin Waffles",
+   "sku": "51726",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Breakfast",
+   "pos": 22,
+   "order": 1022
+  },
+  {
+   "id": "reduced-fat-mac-cheese",
+   "name": "Reduced Fat Mac & Cheese",
+   "sku": "95141",
+   "caseCode": "",
+   "aliases": [
+    "Mac & Cheese Reduced Fat"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 10,
+   "order": 201010
+  },
+  {
+   "id": "shrimp-tempura",
+   "name": "Shrimp Tempura",
+   "sku": "163404",
+   "caseCode": "",
+   "aliases": [
+    "Shrimp Tempura with Soy Dipping"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 14,
+   "order": 201014
+  },
+  {
+   "id": "steak-stout-pies",
+   "name": "Steak & Stout Pies",
+   "sku": "51959",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 11,
+   "order": 201011
+  },
+  {
+   "id": "turkey-meatballs",
+   "name": "Turkey Meatballs",
+   "sku": "44920",
+   "caseCode": "",
+   "aliases": [
+    "Meatballs Turkey"
+   ],
+   "shelf": "Right shelf",
+   "row": "",
+   "section": "Middle row",
+   "pos": 11,
+   "order": 201011
+  },
+  {
+   "id": "u10",
+   "name": "Apple Pie ala mode",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 2,
+   "order": 1002
+  },
+  {
+   "id": "ultra-chocolate-ice-cream",
+   "name": "Ultra Chocolate Ice Cream",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 3,
+   "order": 1003
+  },
+  {
+   "id": "vanilla-mochi",
+   "name": "Vanilla Mochi",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Middle",
+   "section": "Ice Cream",
+   "pos": 10,
+   "order": 1010
+  },
+  {
+   "id": "vegan-tikka-masala",
+   "name": "Vegan Tikka Masala",
+   "sku": "",
+   "caseCode": "",
+   "aliases": [],
+   "shelf": "Left shelf",
+   "row": "Top",
+   "section": "Indian",
+   "pos": 19.5,
+   "order": 19
   }
  ]
 }
