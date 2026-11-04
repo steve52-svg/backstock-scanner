@@ -78,6 +78,10 @@ import kotlin.math.min
 /** One label being followed from frame to frame. Boxes are 0..1 of the screen. */
 class Track(val id: Int, var box: RectF, var text: String, val isBarcode: Boolean) {
     var byPicture = false
+    /** Looks like a short label (not fine print), so it's worth showing even unread. */
+    var labelLike = false
+    /** The last text read here, for teaching. */
+    var raw = ""
     val votes = HashMap<String, Float>()
     var product: Product? = null
     var sure = false
@@ -88,7 +92,7 @@ class Track(val id: Int, var box: RectF, var text: String, val isBarcode: Boolea
 }
 
 /** What the overlay draws for one frame. */
-data class LiveBox(val id: Int, val box: RectF, val product: Product?, val sure: Boolean, val text: String, val held: Boolean, val byPicture: Boolean = false)
+data class LiveBox(val id: Int, val box: RectF, val product: Product?, val sure: Boolean, val text: String, val held: Boolean, val byPicture: Boolean = false, val labelLike: Boolean = false)
 
 data class LiveFrame(val boxes: List<LiveBox> = emptyList(), val fps: Float = 0f, val ms: Long = 0, val res: String = "")
 
@@ -101,6 +105,7 @@ class LiveTracker {
     private var nextId = 0
     var holdMs = 700L
 
+    @Synchronized
     fun update(dets: List<Detection>, now: Long): List<LiveBox> {
         val taken = HashSet<Int>()
         // Read labels first, so they claim their track before unread text does.
@@ -113,6 +118,8 @@ class LiveTracker {
             val a = if (t.hits == 0) 1f else 0.6f
             t.box = RectF(lerp(t.box.left, d.box.left, a), lerp(t.box.top, d.box.top, a), lerp(t.box.right, d.box.right, a), lerp(t.box.bottom, d.box.bottom, a))
             t.hits++; t.lastSeen = now
+            if (!d.text.startsWith(PIC) && d.text.isNotBlank()) t.raw = d.text
+            if (d.product == null && d.id != FINE_PRINT && !d.isBarcode) t.labelLike = true
             val p = d.product
             if (p != null) {
                 t.unreadFrames = 0; t.text = d.text; t.byPicture = d.text.startsWith(PIC)
@@ -126,11 +133,23 @@ class LiveTracker {
         }
         tracks.removeAll { now - it.lastSeen > holdMs }
         return tracks.filter { it.hits >= 2 || it.sure }.map {
-            LiveBox(it.id, RectF(it.box), it.product, it.sure, it.text, held = it.product != null && it.unreadFrames > 0, byPicture = it.byPicture)
+            LiveBox(it.id, RectF(it.box), it.product, it.sure, it.raw, held = it.product != null && it.unreadFrames > 0, byPicture = it.byPicture, labelLike = it.labelLike)
         }
     }
 
+    @Synchronized
     fun clear() { tracks.clear() }
+
+    /** You told it what this box is: it shows that name from now on. */
+    @Synchronized
+    fun relabel(id: Int, p: Product) {
+        val t = tracks.firstOrNull { it.id == id } ?: return
+        t.votes.clear(); t.votes[p.id] = 10f; t.product = p; t.sure = true; t.labelLike = false
+    }
+
+    /** You said this text isn't a product: stop showing the box. */
+    @Synchronized
+    fun drop(id: Int) { tracks.removeAll { it.id == id } }
 
     private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
 
@@ -147,6 +166,8 @@ class LiveTracker {
 
 /** Marks a detection that came from picture matching rather than reading text. */
 const val PIC = "\u0000pic:"
+/** Id for text that's fine print (ingredients, addresses), not a label. */
+const val FINE_PRINT = -2
 
 /** Runs the on-phone readers on camera frames and feeds the tracker. */
 @OptIn(ExperimentalGetImage::class)
@@ -183,7 +204,7 @@ class LiveAnalyzer(private val state: AppState, private val out: MutableStateFlo
                 val found = state.scanner.matchLines(lines)
                 // Text the phone can see but not read (too far, blurry): keep it as an unread box so a
                 // label that was read up close keeps its name.
-                dets += found.ifEmpty { listOf(Detection(-1, Scanner.union(lines.map { it.box }), lines.joinToString(" ") { it.text }, false, emptyList(), null, Level.UNKNOWN)) }
+                dets += found.ifEmpty { listOf(Detection(FINE_PRINT, Scanner.union(lines.map { it.box }), lines.joinToString(" ") { it.text }, false, emptyList(), null, Level.UNKNOWN)) }
             }
             if (frame % 2 == 0L) {
                 val codes = runCatching { Tasks.await(barcodeReader.process(input)) }.getOrNull()
@@ -281,6 +302,7 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
     var selected by remember { mutableStateOf<Int?>(null) }
     var error by remember { mutableStateOf("") }
     var floor by remember { mutableStateOf(false) }
+    var teaching by remember { mutableStateOf(false) }
     var retailStatus by remember { mutableStateOf("") }
 
     LaunchedEffect(floor) {
@@ -341,7 +363,7 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
     }
     fun statusOf(p: Product?): String? = p?.let { pullFor[it.id] }?.let { stock.marks[it.id] ?: if (floor) "back" else null }
 
-    val shown = live.boxes.filter { showUnread || it.product != null }
+    val shown = live.boxes.filter { showUnread || it.product != null || it.labelLike }
     val shownNow by rememberUpdatedState(shown)
     val onList = shown.count { statusOf(it.product) == "need" }
 
@@ -352,7 +374,8 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
             LiveOverlay(shown, selected, floor, { p -> p?.let { pullFor[it.id] }?.let { "${it.cases}" } }, ::statusOf, Modifier.fillMaxSize().pointerInput(Unit) {
                 detectTapGestures { pos ->
                     val w = size.width.toFloat(); val h = size.height.toFloat()
-                    selected = shownNow.filter { it.product != null }.firstOrNull {
+                    teaching = false
+                    selected = shownNow.sortedBy { if (it.product != null) 0 else 1 }.firstOrNull {
                         val pad = 16f
                         pos.x in (it.box.left * w - pad)..(it.box.right * w + pad) && pos.y in (it.box.top * h - pad)..(it.box.bottom * h + pad)
                     }?.id
@@ -372,7 +395,10 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
                 modifier = Modifier.align(Alignment.TopEnd).padding(10.dp).background(Color(0xFFFFD400), RoundedCornerShape(6.dp)).padding(horizontal = 8.dp, vertical = 4.dp))
             LensPicker(plans, lens, onPick = { lensPick = it; frozen = null; analyzer.paused = false }, modifier = Modifier.align(Alignment.BottomStart).padding(10.dp))
             // Tapped box: name, where it goes, and pull-list marking.
-            shown.firstOrNull { it.id == selected }?.product?.let { p ->
+            val sel = shown.firstOrNull { it.id == selected }
+            if (sel != null && (sel.product == null || teaching)) TeachCard(state, sel, analyzer.tracker,
+                onDone = { selected = null; teaching = false }, modifier = Modifier.align(Alignment.BottomEnd))
+            else sel?.product?.let { p ->
                 val item = pullFor[p.id]
                 val st = item?.let { stock.marks[it.id] }
                 Column(
@@ -411,7 +437,10 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
                             else -> Text("Not on the pull list", color = Color(0xFFCFD8DC), fontSize = 13.sp)
                         }
                     } else Text("Not in today's stock list", color = Color(0xFFCFD8DC), fontSize = 13.sp)
-                    PageButton("Close", { selected = null })
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (!sel.byPicture && sel.text.isNotBlank()) PageButton("Wrong name?", { teaching = true })
+                        PageButton("Close", { selected = null })
+                    }
                 }
             }
         }
@@ -484,6 +513,54 @@ private fun LiveOverlay(boxes: List<LiveBox>, selected: Int?, floor: Boolean, ca
             val ly = if (t - m.size.height - 6f > 0) t - m.size.height - 6f else btm + 4f
             drawRoundRect(color, Offset(lx, ly), GSize(m.size.width + 10f, m.size.height + 4f), CornerRadius(6f, 6f))
             drawText(m, topLeft = Offset(lx + 5f, ly + 2f))
+        }
+    }
+}
+
+
+/**
+ * Tap a grey box (or "Wrong name?"): see what the phone read, pick the right product,
+ * and it remembers that writing from then on, in the live view and in photo scans.
+ */
+@Composable
+private fun TeachCard(state: AppState, box: LiveBox, tracker: LiveTracker, onDone: () -> Unit, modifier: Modifier) {
+    var q by remember(box.id) { mutableStateOf("") }
+    val read = box.text
+    val picks = remember(box.id, q) {
+        val sug = if (read.isBlank()) emptyList() else state.matcher.guessText(read, 6).map { it.product }
+        (if (q.isBlank()) sug else state.matcher.search(q, 12) + sug).distinctBy { it.id }.take(12)
+    }
+    fun teach(p: Product) {
+        if (read.isNotBlank()) { state.learned.teachWriting(read, p.id); state.matcher.rebuild() }
+        tracker.relabel(box.id, p)
+        onDone()
+    }
+    Column(
+        modifier.padding(10.dp).width(320.dp).heightIn(max = 420.dp)
+            .background(Color.Black.copy(alpha = 0.88f), RoundedCornerShape(10.dp)).padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text("What is this box?", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(if (read.isBlank()) "Couldn't make out any letters." else "The phone read: \u201C${read.take(60)}\u201D", color = Color(0xFFCFD8DC), fontSize = 13.sp)
+        androidx.compose.material3.OutlinedTextField(
+            q, { q = it }, singleLine = true, placeholder = { Text("Search products") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White),
+        )
+        Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            picks.forEach { p ->
+                Text(p.name, color = Color.White, fontSize = 15.sp,
+                    modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(6.dp))
+                        .pointerInput(p.id) { detectTapGestures { teach(p) } }.padding(horizontal = 10.dp, vertical = 9.dp))
+            }
+            if (q.isNotBlank()) Text("+ Add \u201C${q.trim()}\u201D as a new product", color = Color(0xFFFFD400), fontSize = 14.sp,
+                modifier = Modifier.fillMaxWidth().pointerInput(q) { detectTapGestures { teach(state.addProduct(q.trim())) } }.padding(10.dp))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (read.isNotBlank()) PageButton("Not a product", {
+                state.learned.ignore(read); state.matcher.rebuild(); tracker.drop(box.id); onDone()
+            })
+            PageButton("Cancel", onDone)
         }
     }
 }
