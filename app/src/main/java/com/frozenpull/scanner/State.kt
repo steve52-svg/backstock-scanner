@@ -64,6 +64,8 @@ class AppState(private val context: Context) {
     val learned = Learned(context)
     val matcher = Matcher(catalog, learned)
     val scanner = Scanner(matcher, learned)
+    /** Retail pictures and on-phone picture matching (for the sales floor). */
+    val retail by lazy { Retail(context, catalog) }
     val found = Found(context)
     val photos = mutableStateListOf<ScanPhoto>()
     /** Today's stock list and pull list (filled from the pull list page). */

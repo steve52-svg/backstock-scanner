@@ -62,6 +62,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.Executors
@@ -76,6 +77,7 @@ import kotlin.math.min
 
 /** One label being followed from frame to frame. Boxes are 0..1 of the screen. */
 class Track(val id: Int, var box: RectF, var text: String, val isBarcode: Boolean) {
+    var byPicture = false
     val votes = HashMap<String, Float>()
     var product: Product? = null
     var sure = false
@@ -86,7 +88,7 @@ class Track(val id: Int, var box: RectF, var text: String, val isBarcode: Boolea
 }
 
 /** What the overlay draws for one frame. */
-data class LiveBox(val id: Int, val box: RectF, val product: Product?, val sure: Boolean, val text: String, val held: Boolean)
+data class LiveBox(val id: Int, val box: RectF, val product: Product?, val sure: Boolean, val text: String, val held: Boolean, val byPicture: Boolean = false)
 
 data class LiveFrame(val boxes: List<LiveBox> = emptyList(), val fps: Float = 0f, val ms: Long = 0, val res: String = "")
 
@@ -113,7 +115,7 @@ class LiveTracker {
             t.hits++; t.lastSeen = now
             val p = d.product
             if (p != null) {
-                t.unreadFrames = 0; t.text = d.text
+                t.unreadFrames = 0; t.text = d.text; t.byPicture = d.text.startsWith(PIC)
                 t.votes[p.id] = (t.votes[p.id] ?: 0f) + if (d.level == Level.SURE) 2f else 1f
                 val top = t.votes.maxByOrNull { it.value }!!
                 if (t.product?.id != top.key) t.product = if (top.key == p.id) p else t.product
@@ -124,7 +126,7 @@ class LiveTracker {
         }
         tracks.removeAll { now - it.lastSeen > holdMs }
         return tracks.filter { it.hits >= 2 || it.sure }.map {
-            LiveBox(it.id, RectF(it.box), it.product, it.sure, it.text, held = it.product != null && it.unreadFrames > 0)
+            LiveBox(it.id, RectF(it.box), it.product, it.sure, it.text, held = it.product != null && it.unreadFrames > 0, byPicture = it.byPicture)
         }
     }
 
@@ -143,6 +145,9 @@ class LiveTracker {
     }
 }
 
+/** Marks a detection that came from picture matching rather than reading text. */
+const val PIC = "\u0000pic:"
+
 /** Runs the on-phone readers on camera frames and feeds the tracker. */
 @OptIn(ExperimentalGetImage::class)
 class LiveAnalyzer(private val state: AppState, private val out: MutableStateFlow<LiveFrame>) : ImageAnalysis.Analyzer {
@@ -150,6 +155,8 @@ class LiveAnalyzer(private val state: AppState, private val out: MutableStateFlo
     private val barcodeReader = BarcodeScanning.getClient()
     val tracker = LiveTracker()
     @Volatile var paused = false
+    /** On the sales floor: also match retail packages by their picture. */
+    @Volatile var floor = false
     private var frame = 0L
     private var lastAt = 0L
     private var fps = 0f
@@ -188,6 +195,7 @@ class LiveAnalyzer(private val state: AppState, private val out: MutableStateFlo
                     dets += Detection(-1, toScreen(r), raw, true, listOf(g), g.product, if (g.score >= 0.95f) Level.SURE else Level.GUESS)
                 }
             }
+            if (floor) pictureMatch(proxy, rot, crop, dets)
             val now = SystemClock.elapsedRealtime()
             val boxes = tracker.update(dets.filter { it.box.right > 0 && it.box.left < 1 && it.box.bottom > 0 && it.box.top < 1 }, now)
             val took = (now - t0).toFloat()
@@ -202,6 +210,38 @@ class LiveAnalyzer(private val state: AppState, private val out: MutableStateFlo
     }
 
     fun close() { textReader.close(); barcodeReader.close() }
+
+    /**
+     * Retail packages: around text that couldn't be read for sure, cut out the package and
+     * compare it with the retail pictures. A few per frame, so the view stays live.
+     */
+    private fun pictureMatch(proxy: ImageProxy, rot: Int, crop: Rect, dets: MutableList<Detection>) {
+        val retail = state.retail
+        if (!retail.ready) return
+        val todo = dets.withIndex().filter { (_, d) -> !d.isBarcode && d.level != Level.SURE && d.box.width() > 0.015f }
+            .sortedByDescending { it.value.box.width() * it.value.box.height() }.take(4)
+        if (todo.isEmpty()) return
+        val frame = runCatching { proxy.toBitmap() }.getOrNull() ?: return
+        val up = if (rot == 0) frame else Bitmap.createBitmap(frame, 0, 0, frame.width, frame.height, android.graphics.Matrix().apply { postRotate(rot.toFloat()) }, true)
+        for ((i, d) in todo) {
+            // The package is bigger than its label: widen and heighten the box around the text.
+            val cx = d.box.centerX(); val cy = d.box.centerY()
+            val w = max(d.box.width() * 2.2f, 0.08f); val h = max(d.box.height() * 4f, 0.12f)
+            val r = RectF(cx - w / 2, cy - h * 0.45f, cx + w / 2, cy + h * 0.55f)
+            val l = (crop.left + r.left.coerceIn(0f, 1f) * crop.width()).toInt().coerceIn(0, up.width - 1)
+            val t = (crop.top + r.top.coerceIn(0f, 1f) * crop.height()).toInt().coerceIn(0, up.height - 1)
+            val rr = (crop.left + r.right.coerceIn(0f, 1f) * crop.width()).toInt().coerceIn(l + 1, up.width)
+            val bb = (crop.top + r.bottom.coerceIn(0f, 1f) * crop.height()).toInt().coerceIn(t + 1, up.height)
+            if (rr - l < 48 || bb - t < 48) continue
+            val hit = runCatching { retail.match(Bitmap.createBitmap(up, l, t, rr - l, bb - t)) }.getOrNull() ?: continue
+            if (hit.score < 0.72f || hit.margin < 0.03f) continue
+            // Text that clearly names something else wins over the picture.
+            if (d.product != null && d.product.id != hit.product.id && (d.guesses.firstOrNull()?.score ?: 0f) >= 0.8f) continue
+            val level = if (hit.score >= 0.85f && hit.margin >= 0.06f) Level.SURE else Level.GUESS
+            dets[i] = Detection(-1, RectF(r.left.coerceIn(0f, 1f), r.top.coerceIn(0f, 1f), r.right.coerceIn(0f, 1f), r.bottom.coerceIn(0f, 1f)),
+                PIC + hit.product.name, false, listOf(Guess(hit.product, hit.score, "picture")), hit.product, level)
+        }
+    }
 
     companion object {
         /** A rectangle in the camera's buffer, turned the way the image is shown. */
@@ -240,6 +280,18 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
     var camera by remember { mutableStateOf<Camera?>(null) }
     var selected by remember { mutableStateOf<Int?>(null) }
     var error by remember { mutableStateOf("") }
+    var floor by remember { mutableStateOf(false) }
+    var retailStatus by remember { mutableStateOf("") }
+
+    LaunchedEffect(floor) {
+        analyzer.floor = floor
+        analyzer.tracker.clear()
+        if (floor && !state.retail.ready) {
+            val job = launch(kotlinx.coroutines.Dispatchers.Default) { state.retail.prepare() }
+            while (job.isActive) { retailStatus = state.retail.status; delay(250) }
+        }
+        retailStatus = if (floor) state.retail.status else ""
+    }
 
     LaunchedEffect(holdLong) { analyzer.tracker.holdMs = if (holdLong) 2000L else 700L }
     LaunchedEffect(lens, sharp) {
@@ -287,7 +339,7 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
         }
         m
     }
-    fun statusOf(p: Product?): String? = p?.let { pullFor[it.id] }?.let { stock.marks[it.id] }
+    fun statusOf(p: Product?): String? = p?.let { pullFor[it.id] }?.let { stock.marks[it.id] ?: if (floor) "back" else null }
 
     val shown = live.boxes.filter { showUnread || it.product != null }
     val shownNow by rememberUpdatedState(shown)
@@ -297,7 +349,7 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
         Box(Modifier.weight(1f).fillMaxHeight()) {
             AndroidView({ previewView }, Modifier.fillMaxSize())
             frozen?.let { Image(it.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.FillBounds) }
-            LiveOverlay(shown, selected, ::statusOf, Modifier.fillMaxSize().pointerInput(Unit) {
+            LiveOverlay(shown, selected, floor, { p -> p?.let { pullFor[it.id] }?.let { "${it.cases}" } }, ::statusOf, Modifier.fillMaxSize().pointerInput(Unit) {
                 detectTapGestures { pos ->
                     val w = size.width.toFloat(); val h = size.height.toFloat()
                     selected = shownNow.filter { it.product != null }.firstOrNull {
@@ -309,7 +361,8 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
             // Speed readout, so we can judge if live is good enough.
             Text(
                 "${"%.1f".format(live.fps)} reads/sec · ${live.ms} ms each · ${shown.count { it.product != null }} named" +
-                    (if (onList > 0) " · $onList on pull list" else "") + "  (${live.res})",
+                    (if (onList > 0) " · $onList on pull list" else "") + "  (${live.res})" +
+                    (if (retailStatus.isNotEmpty()) "\n$retailStatus" else ""),
                 color = Color.White, fontSize = 13.sp,
                 modifier = Modifier.align(Alignment.TopStart).padding(10.dp)
                     .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(6.dp)).padding(horizontal = 8.dp, vertical = 4.dp),
@@ -327,8 +380,29 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
                         .background(Color.Black.copy(alpha = 0.8f), RoundedCornerShape(10.dp)).padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Text(p.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    if (item != null) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        val pic = remember(p.id) { state.retail.pictureFor(p) }
+                        if (pic != null) Image(pic.asImageBitmap(), "What it looks like", Modifier.size(72.dp).background(Color.White, RoundedCornerShape(6.dp)).padding(3.dp))
+                        Column {
+                            Text(p.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            if (shown.firstOrNull { it.id == selected }?.byPicture == true) Text("Matched by its picture", color = Color(0xFFCFD8DC), fontSize = 12.sp)
+                        }
+                    }
+                    if (item != null && floor) {
+                        Text("In back stock: ${stock.caseText(item)} · ${stock.place(item).ifBlank { "walk-in" }}", color = Color(0xFFCFD8DC), fontSize = 13.sp)
+                        when (st) {
+                            "need" -> { Text("On the pull list", color = Color(0xFFFFD400), fontSize = 13.sp)
+                                PageButton("Take off the list", { stock.mark(item.id, null) }) }
+                            "pulled" -> Text("Already pulled today", color = Color(0xFF2ECC71), fontSize = 13.sp)
+                            else -> PageButton("Add to pull list", {
+                                if (item.id !in stock.order) stock.order.add(item.id)
+                                stock.mark(item.id, "need")
+                                selected = null
+                            }, kind = Btn.ACCENT)
+                        }
+                    } else if (floor) {
+                        Text("No back stock for this today", color = Color(0xFFCFD8DC), fontSize = 13.sp)
+                    } else if (item != null) {
                         Text("${stock.caseText(item)} · ${stock.place(item).ifBlank { "in stock" }}", color = Color(0xFFCFD8DC), fontSize = 13.sp)
                         when (st) {
                             "need" -> { Text(stock.pullText(item), color = Color(0xFFFFD400), fontSize = 13.sp)
@@ -348,6 +422,7 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
         ) {
             Text("LIVE VIEW", style = Type.title.copy(fontSize = 20.sp), color = Ink)
             Text("Test version · nothing is uploaded", style = Type.small, color = Muted)
+            Seg(listOf("Walk-in", "Floor"), if (floor) 1 else 0) { floor = it == 1; selected = null }
             PageButton(if (frozen == null) "Pause" else "Resume", {
                 if (frozen == null) { analyzer.paused = true; frozen = previewView.bitmap }
                 else { frozen = null; analyzer.paused = false; selected = null }
@@ -357,7 +432,7 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
             PageButton(if (showUnread) "Unread: shown" else "Unread: hidden", { showUnread = !showUnread }, modifier = Modifier.fillMaxWidth())
             PageButton(if (torch) "Light: on" else "Light: off", { torch = !torch }, modifier = Modifier.fillMaxWidth())
             PageButton("Back", onBack, modifier = Modifier.fillMaxWidth())
-            Legend()
+            Legend(floor)
         }
     }
 }
@@ -366,11 +441,13 @@ private val Yellow = Color(0xFFFFD400)
 private val Pulled = Color(0xFF2ECC71)
 private val Known = Color(0xFFFFFFFF)
 private val Grey = Color(0xFFB0BEC5)
+private val Back = Color(0xFF4FC0CC)
 
 @Composable
-private fun Legend() {
+private fun Legend(floor: Boolean) {
     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-        listOf(Yellow to "On pull list", Pulled to "Pulled", Known to "In stock", Grey to "Can't read").forEach { (c, t) ->
+        (if (floor) listOf(Back to "Back stock: tap to add", Yellow to "On pull list", Pulled to "Pulled", Known to "None in back", Grey to "Can't read")
+         else listOf(Yellow to "On pull list", Pulled to "Pulled", Known to "In stock", Grey to "Can't read")).forEach { (c, t) ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(12.dp).background(c, RoundedCornerShape(2.dp)))
                 Spacer(Modifier.width(6.dp)); Text(t, style = Type.small, color = Muted)
@@ -380,7 +457,7 @@ private fun Legend() {
 }
 
 @Composable
-private fun LiveOverlay(boxes: List<LiveBox>, selected: Int?, statusOf: (Product?) -> String?, modifier: Modifier) {
+private fun LiveOverlay(boxes: List<LiveBox>, selected: Int?, floor: Boolean, casesOf: (Product?) -> String?, statusOf: (Product?) -> String?, modifier: Modifier) {
     val measurer = rememberTextMeasurer()
     val dens = LocalDensity.current
     val style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Black)
@@ -389,17 +466,18 @@ private fun LiveOverlay(boxes: List<LiveBox>, selected: Int?, statusOf: (Product
         val w = size.width; val h = size.height
         val pad = with(dens) { 6.dp.toPx() }
         // Pull-list boxes last, so they draw on top.
-        for (b in boxes.sortedBy { if (statusOf(it.product) == "need") 1 else 0 }) {
+        for (b in boxes.sortedBy { when (statusOf(it.product)) { "need" -> 2; "back" -> 1; else -> 0 } }) {
             val st = statusOf(b.product)
-            val color = when { b.product == null -> Grey; st == "need" -> Yellow; st == "pulled" -> Pulled; else -> Known }
-            val stroke = with(dens) { (if (st == "need") 4.dp else if (b.product == null) 1.5.dp else 2.5.dp).toPx() }
+            val color = when { b.product == null -> Grey; st == "need" -> Yellow; st == "pulled" -> Pulled; st == "back" -> Back; else -> Known }
+            val stroke = with(dens) { (if (st == "need" || st == "back") 4.dp else if (b.product == null) 1.5.dp else 2.5.dp).toPx() }
             val l = b.box.left * w - pad; val t = b.box.top * h - pad
             val r = b.box.right * w + pad; val btm = b.box.bottom * h + pad
             val sel = b.id == selected
             drawRoundRect(color, Offset(l, t), GSize(r - l, btm - t), CornerRadius(8f, 8f),
                 style = Stroke(width = if (sel) stroke * 1.8f else stroke, pathEffect = if (b.product == null || (b.held && st != "need")) dash else null))
             val p = b.product ?: continue
-            val label = (if (st == "need") "PULL · " else if (st == "pulled") "✓ " else "") + p.name + (if (!b.sure) " ?" else "")
+            val label = (if (floor) when (st) { "need" -> "ON LIST · "; "pulled" -> "✓ "; "back" -> "IN BACK ${casesOf(p) ?: ""} · "; else -> "" }
+                else if (st == "need") "PULL · " else if (st == "pulled") "✓ " else "") + p.name + (if (b.byPicture) " ◆" else "") + (if (!b.sure) " ?" else "")
             val maxW = max(with(dens) { 160.dp.toPx() }, r - l).toInt()
             val m = measurer.measure(label, style, maxLines = 1, overflow = TextOverflow.Ellipsis, constraints = Constraints(maxWidth = maxW))
             val lx = min(max(0f, l), w - m.size.width - 8f)
