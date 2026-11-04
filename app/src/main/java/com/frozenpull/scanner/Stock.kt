@@ -154,6 +154,14 @@ class StockStore(context: Context) {
         date = LocalDate.now().toString(); updated = ""; save()
     }
 
+    /** Replaces the stock list with what a live sweep counted (marks for the same products are kept). */
+    fun setFromSweep(list: List<StockItem>) {
+        items.clear(); items += list
+        for (it in list.sortedWith(compareBy<StockItem>({ wallOrder.indexOf(it.shelf).let { i -> if (i < 0) 9 else i } },
+                { rowOrder.indexOf(it.row).let { i -> if (i < 0) 3 else i } }, { it.pos }))) if (it.id !in order) order += it.id
+        updated = java.time.OffsetDateTime.now().toString(); save()
+    }
+
     fun pullList(): List<StockItem> {
         val byId = items.associateBy { it.id }
         return order.mapNotNull { byId[it] }.filter { isNeed(it.id) }

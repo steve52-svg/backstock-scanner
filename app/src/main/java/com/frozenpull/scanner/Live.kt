@@ -94,7 +94,11 @@ class Track(val id: Int, var box: RectF, var text: String, val isBarcode: Boolea
 /** What the overlay draws for one frame. */
 data class LiveBox(val id: Int, val box: RectF, val product: Product?, val sure: Boolean, val text: String, val held: Boolean, val byPicture: Boolean = false, val labelLike: Boolean = false)
 
-data class LiveFrame(val boxes: List<LiveBox> = emptyList(), val fps: Float = 0f, val ms: Long = 0, val res: String = "")
+data class LiveFrame(
+    val boxes: List<LiveBox> = emptyList(), val fps: Float = 0f, val ms: Long = 0, val res: String = "",
+    /** Shelf markers and pinned cases in view, 0..1 of the screen. */
+    val markers: List<MarkerView> = emptyList(), val pins: List<PinView> = emptyList(),
+)
 
 /**
  * Keeps labels steady between frames: a label that was read once keeps its name while it's
@@ -217,13 +221,23 @@ class LiveAnalyzer(private val state: AppState, private val out: MutableStateFlo
                 }
             }
             pictureMatch(proxy, rot, crop, dets)
+            val seenMarkers = if (floor) emptyList() else findMarkers(proxy, rot, crop)
             val now = SystemClock.elapsedRealtime()
             val boxes = tracker.update(dets.filter { it.box.right > 0 && it.box.left < 1 && it.box.bottom > 0 && it.box.top < 1 }, now)
+            // Pin what was read to the shelf (sweep counting).
+            val cw = crop.width().toFloat(); val ch = crop.height().toFloat()
+            var mv = emptyList<MarkerView>(); var pins = emptyList<PinView>()
+            if (!floor) {
+                val labels = boxes.filter { it.product != null }.map { LabelSeen(it.id, it.product!!.id, it.sure, it.box.centerX() * cw, it.box.centerY() * ch) }
+                val (p, m) = state.sweep.update(seenMarkers, labels, now, if (lastAt > 0) now - lastAt else 0, cw, ch)
+                pins = p.map { it.copy(x = it.x / cw, y = it.y / ch) }
+                mv = m.map { v -> v.copy(corners = FloatArray(8) { k -> v.corners[k] / if (k % 2 == 0) cw else ch }) }
+            }
             val took = (now - t0).toFloat()
             ms = if (ms == 0f) took else ms * 0.85f + took * 0.15f
             if (lastAt > 0) { val f = 1000f / max(1L, now - lastAt); fps = if (fps == 0f) f else fps * 0.85f + f * 0.15f }
             lastAt = now; frame++
-            out.value = LiveFrame(boxes, fps, ms.toLong(), "${proxy.width}×${proxy.height}")
+            out.value = LiveFrame(boxes, fps, ms.toLong(), "${proxy.width}×${proxy.height}", mv, pins)
         } catch (_: Exception) {
         } finally {
             proxy.close()
@@ -231,6 +245,46 @@ class LiveAnalyzer(private val state: AppState, private val out: MutableStateFlo
     }
 
     fun close() { textReader.close(); barcodeReader.close() }
+
+    // ---------- shelf markers (4×4 ArUco), walk-in only ----------
+    private val aruco: org.opencv.objdetect.ArucoDetector? by lazy {
+        runCatching {
+            org.opencv.android.OpenCVLoader.initLocal()
+            org.opencv.objdetect.ArucoDetector(
+                org.opencv.objdetect.Objdetect.getPredefinedDictionary(org.opencv.objdetect.Objdetect.DICT_4X4_50),
+                org.opencv.objdetect.DetectorParameters(),
+            )
+        }.getOrNull()
+    }
+
+    /** Finds the markers in a frame; corners come back upright, in pixels of the on-screen part. */
+    private fun findMarkers(proxy: ImageProxy, rot: Int, crop: Rect): List<SeenMarker> {
+        val det = aruco ?: return emptyList()
+        val plane = proxy.image?.planes?.getOrNull(0) ?: return emptyList()
+        val w = proxy.width; val h = proxy.height; val rs = plane.rowStride
+        val buf = plane.buffer.duplicate(); buf.rewind()
+        val gray = org.opencv.core.Mat(h, w, org.opencv.core.CvType.CV_8UC1)
+        val row = ByteArray(w)
+        for (y in 0 until h) {
+            buf.position(y * rs); buf.get(row, 0, min(w, buf.remaining())); gray.put(y, 0, row)
+        }
+        val up = if (rot == 0) gray else org.opencv.core.Mat().also {
+            org.opencv.core.Core.rotate(gray, it, when (rot) { 90 -> org.opencv.core.Core.ROTATE_90_CLOCKWISE; 180 -> org.opencv.core.Core.ROTATE_180; else -> org.opencv.core.Core.ROTATE_90_COUNTERCLOCKWISE })
+            gray.release()
+        }
+        val corners = mutableListOf<org.opencv.core.Mat>(); val ids = org.opencv.core.Mat()
+        runCatching { det.detectMarkers(up, corners, ids) }
+        val out = mutableListOf<SeenMarker>()
+        for (i in corners.indices) {
+            val id = ids.get(i, 0)?.getOrNull(0)?.toInt() ?: continue
+            val c = FloatArray(8)
+            for (k in 0 until 4) { val pt = corners[i].get(0, k); c[2 * k] = (pt[0] - crop.left).toFloat(); c[2 * k + 1] = (pt[1] - crop.top).toFloat() }
+            out += SeenMarker(id, c)
+            corners[i].release()
+        }
+        ids.release(); up.release()
+        return out
+    }
 
     /**
      * Around text that couldn't be read for sure, cut out the package (floor) or case (walk-in)
@@ -307,6 +361,14 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
     var error by remember { mutableStateOf("") }
     var floor by remember { mutableStateOf(false) }
     var teaching by remember { mutableStateOf(false) }
+    var markerSel by remember { mutableStateOf<Int?>(null) }
+    var pinSel by remember { mutableStateOf<String?>(null) }
+    var summary by remember { mutableStateOf<SweepSummary?>(null) }
+    var sweeping by remember { mutableStateOf(state.sweep.sweeping) }
+    var counts by remember { mutableStateOf(Triple(0, 0, 0)) }
+    val sweep = state.sweep
+    LaunchedEffect(Unit) { while (true) { counts = Triple(sweep.setCount(), sweep.linkedCount(), sweep.countedCount()); delay(1000) } }
+    val liveNow by rememberUpdatedState(live)
     var retailStatus by remember { mutableStateOf("") }
 
     LaunchedEffect(floor) {
@@ -376,10 +438,24 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
         Box(Modifier.weight(1f).fillMaxHeight()) {
             AndroidView({ previewView }, Modifier.fillMaxSize())
             frozen?.let { Image(it.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.FillBounds) }
+            if (!floor) SweepOverlay(live.markers, live.pins, state.catalog, markerSel, pinSel, Modifier.fillMaxSize())
             LiveOverlay(shown, selected, floor, { p -> p?.let { pullFor[it.id] }?.let { "${it.cases}" } }, ::statusOf, Modifier.fillMaxSize().pointerInput(Unit) {
                 detectTapGestures { pos ->
                     val w = size.width.toFloat(); val h = size.height.toFloat()
                     teaching = false
+                    val f = liveNow
+                    // A shelf marker first (to set it up), then a pinned case, then a label.
+                    val mk = f.markers.firstOrNull { m ->
+                        val xs = (0 until 4).map { m.corners[2 * it] * w }; val ys = (0 until 4).map { m.corners[2 * it + 1] * h }
+                        pos.x in (xs.min() - 30)..(xs.max() + 30) && pos.y in (ys.min() - 30)..(ys.max() + 30)
+                    }
+                    if (mk != null) { markerSel = mk.id; pinSel = null; selected = null; return@detectTapGestures }
+                    val pin = f.pins.minByOrNull { kotlin.math.hypot(it.x * w - pos.x, it.y * h - pos.y) }?.takeIf { kotlin.math.hypot(it.x * w - pos.x, it.y * h - pos.y) < 60f }
+                    markerSel = null
+                    if (pin != null && shownNow.none { b -> pos.x in b.box.left * w..b.box.right * w && pos.y in b.box.top * h..b.box.bottom * h }) {
+                        pinSel = pin.caseId; selected = null; return@detectTapGestures
+                    }
+                    pinSel = null
                     selected = shownNow.sortedBy { if (it.product != null) 0 else 1 }.firstOrNull {
                         val pad = 16f
                         pos.x in (it.box.left * w - pad)..(it.box.right * w + pad) && pos.y in (it.box.top * h - pad)..(it.box.bottom * h + pad)
@@ -400,6 +476,15 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
                 modifier = Modifier.align(Alignment.TopEnd).padding(10.dp).background(Color(0xFFFFD400), RoundedCornerShape(6.dp)).padding(horizontal = 8.dp, vertical = 4.dp))
             LensPicker(plans, lens, onPick = { lensPick = it; frozen = null; analyzer.paused = false }, modifier = Modifier.align(Alignment.BottomStart).padding(10.dp))
             // Tapped box: name, where it goes, and pull-list marking.
+            markerSel?.let { id ->
+                MarkerCard(state, id, onDone = { markerSel = null }, modifier = Modifier.align(Alignment.BottomEnd))
+            }
+            pinSel?.let { cid ->
+                PinCard(state, cid, onDone = { pinSel = null }, modifier = Modifier.align(Alignment.BottomEnd))
+            }
+            summary?.let { sm ->
+                SummaryCard(state, sm, onSaved = { summary = null; sweeping = false }, onClose = { summary = null }, modifier = Modifier.align(Alignment.Center))
+            }
             val sel = shown.firstOrNull { it.id == selected }
             if (sel != null && (sel.product == null || teaching)) TeachCard(state, sel, analyzer.tracker, if (floor) PicKind.RETAIL else PicKind.CASE,
                 grab = { frozen ?: previewView.bitmap },
@@ -457,7 +542,13 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
         ) {
             Text("LIVE VIEW", style = Type.title.copy(fontSize = 20.sp), color = Ink)
             Text("Test version · nothing is uploaded", style = Type.small, color = Muted)
-            Seg(listOf("Walk-in", "Floor"), if (floor) 1 else 0) { floor = it == 1; selected = null }
+            Seg(listOf("Walk-in", "Floor"), if (floor) 1 else 0) { floor = it == 1; selected = null; markerSel = null; pinSel = null }
+            if (!floor) {
+                if (!sweeping) PageButton("Start sweep", { sweep.startSweep(SystemClock.elapsedRealtime()); sweeping = true }, kind = Btn.DARK, modifier = Modifier.fillMaxWidth())
+                else PageButton("Finish sweep", { summary = sweep.summary() }, kind = Btn.DARK, modifier = Modifier.fillMaxWidth())
+                Text("Markers ${counts.first} set · ${counts.second} linked\n${counts.third} cases counted" + if (sweeping) "\nSweeping…" else "",
+                    style = Type.small, color = Muted)
+            }
             PageButton(if (frozen == null) "Pause" else "Resume", {
                 if (frozen == null) { analyzer.paused = true; frozen = previewView.bitmap }
                 else { frozen = null; analyzer.paused = false; selected = null }
@@ -583,5 +674,141 @@ private fun TeachCard(state: AppState, box: LiveBox, tracker: LiveTracker, kind:
             })
             PageButton("Cancel", onDone)
         }
+    }
+}
+
+
+// ---------------------------------------------------------------------------------------------
+// Sweep counting on screen
+// ---------------------------------------------------------------------------------------------
+
+private val MarkerNew = Color(0xFFFF9F43)
+private val MarkerLinking = Color(0xFFFFD400)
+private val MarkerOk = Color(0xFF2ECC71)
+
+@Composable
+private fun SweepOverlay(markers: List<MarkerView>, pins: List<PinView>, catalog: Catalog, markerSel: Int?, pinSel: String?, modifier: Modifier) {
+    val measurer = rememberTextMeasurer()
+    val dens = LocalDensity.current
+    Canvas(modifier) {
+        val w = size.width; val h = size.height
+        for (m in markers) {
+            val c = if (!m.set) MarkerNew else if (!m.linked) MarkerLinking else MarkerOk
+            val path = androidx.compose.ui.graphics.Path().apply {
+                moveTo(m.corners[0] * w, m.corners[1] * h)
+                for (k in 1 until 4) lineTo(m.corners[2 * k] * w, m.corners[2 * k + 1] * h)
+                close()
+            }
+            drawPath(path, c, style = Stroke(width = with(dens) { (if (m.id == markerSel) 5.dp else 3.dp).toPx() }))
+            val label = "#${m.id + 1}" + when { !m.set -> " · tap to set"; !m.linked -> " · linking"; else -> "" }
+            val t = measurer.measure(label, TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.Black))
+            val x = m.corners[0] * w; val y = m.corners[1] * h - t.size.height - 6
+            drawRoundRect(c, Offset(x, y), GSize(t.size.width + 8f, t.size.height + 2f), CornerRadius(4f, 4f))
+            drawText(t, topLeft = Offset(x + 4, y + 1))
+        }
+        for (p in pins) {
+            val color = when { !p.counted -> Color(0xFFB0BEC5); p.seenNow -> MarkerOk; else -> Color.White }
+            val cx = p.x * w; val cy = p.y * h
+            drawCircle(Color.Black.copy(alpha = 0.6f), radius = with(dens) { 9.dp.toPx() }, center = Offset(cx, cy))
+            drawCircle(color, radius = with(dens) { (if (p.caseId == pinSel) 8.dp else 6.dp).toPx() }, center = Offset(cx, cy))
+            if (p.partial) drawCircle(Color(0xFFD9B77C), radius = with(dens) { 3.dp.toPx() }, center = Offset(cx, cy))
+        }
+    }
+}
+
+/** Tap a marker: say which wall and row it's on. */
+@Composable
+private fun MarkerCard(state: AppState, id: Int, onDone: () -> Unit, modifier: Modifier) {
+    val info = state.sweep.marker(id)
+    var wall by remember(id) { mutableStateOf(info?.wall ?: WALLS[0]) }
+    var row by remember(id) { mutableStateOf(info?.row ?: ROWS[0]) }
+    Column(
+        modifier.padding(10.dp).width(340.dp).background(Color.Black.copy(alpha = 0.88f), RoundedCornerShape(10.dp)).padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text("Marker #${id + 1}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(if (info == null) "Where is this marker?" else if (info.linked) "Set up and on the map." else "Set up. It joins the map once it's been in view with a marker that's already on the map.",
+            color = Color(0xFFCFD8DC), fontSize = 13.sp)
+        Seg(WALLS.map { it.replace(" shelf", "") }, WALLS.indexOf(wall)) { wall = WALLS[it] }
+        Seg(ROWS, ROWS.indexOf(row)) { row = ROWS[it] }
+        Text("Row = the shelf this marker's lip holds up.", color = Color(0xFF93A4B0), fontSize = 12.sp)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            PageButton("Save", { state.sweep.setMarker(id, wall, row); onDone() }, kind = Btn.ACCENT)
+            if (info != null) PageButton("Forget", { state.sweep.forgetMarker(id); onDone() }, kind = Btn.DANGER)
+            PageButton("Cancel", onDone)
+        }
+    }
+}
+
+/** Tap a pinned case: partial or full, wrong product, or not a case. */
+@Composable
+private fun PinCard(state: AppState, caseId: String, onDone: () -> Unit, modifier: Modifier) {
+    val c = state.sweep.case(caseId)
+    if (c == null) { LaunchedEffect(caseId) { onDone() }; return }
+    val p = state.catalog[c.productId]
+    var picking by remember(caseId) { mutableStateOf(false) }
+    var q by remember(caseId) { mutableStateOf("") }
+    Column(
+        modifier.padding(10.dp).width(320.dp).heightIn(max = 440.dp).background(Color.Black.copy(alpha = 0.88f), RoundedCornerShape(10.dp)).padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(p?.name ?: c.productId, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text("${c.wall} · ${c.row.lowercase()} row · read ${c.reads}×" + if (!c.counted) " (not counted yet)" else "", color = Color(0xFFCFD8DC), fontSize = 13.sp)
+        if (!picking) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PageButton(if (c.partial) "Partial ✓" else "Mark partial", { state.sweep.setPartial(caseId, !c.partial); onDone() })
+                PageButton("Wrong product?", { picking = true })
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PageButton("Not a case", { state.sweep.removeCase(caseId); onDone() }, kind = Btn.DANGER)
+                PageButton("Close", onDone)
+            }
+        } else {
+            androidx.compose.material3.OutlinedTextField(q, { q = it }, singleLine = true, placeholder = { Text("Search products") }, modifier = Modifier.fillMaxWidth(),
+                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White))
+            Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                state.matcher.search(q, 12).forEach { x ->
+                    Text(x.name, color = Color.White, fontSize = 15.sp, modifier = Modifier.fillMaxWidth()
+                        .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(6.dp))
+                        .pointerInput(x.id) { detectTapGestures { state.sweep.relabel(caseId, x.id); onDone() } }.padding(horizontal = 10.dp, vertical = 9.dp))
+                }
+            }
+            PageButton("Cancel", { picking = false })
+        }
+    }
+}
+
+/** End of a sweep: what's new, what looks gone, what needs a look; then it becomes the back-stock list. */
+@Composable
+private fun SummaryCard(state: AppState, s: SweepSummary, onSaved: () -> Unit, onClose: () -> Unit, modifier: Modifier) {
+    var removeGone by remember { mutableStateOf(true) }
+    var keepCheck by remember { mutableStateOf(false) }
+    fun names(list: List<CaseRec>) = list.groupBy { it.productId }.entries.sortedByDescending { it.value.size }
+        .joinToString(", ") { (pid, cs) -> (state.catalog[pid]?.name ?: pid) + if (cs.size > 1) " ×${cs.size}" else "" }
+    Column(
+        modifier.padding(10.dp).width(420.dp).heightIn(max = 480.dp).background(Color.Black.copy(alpha = 0.92f), RoundedCornerShape(10.dp))
+            .verticalScroll(rememberScrollState()).padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text("Sweep done", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text("New this sweep: ${s.added.size} cases" + if (s.added.isNotEmpty()) "\n${names(s.added)}" else "", color = Color(0xFFCFD8DC), fontSize = 13.sp)
+        if (s.gone.isNotEmpty()) {
+            Text("Gone? ${s.gone.size} cases were in view but not seen:\n${names(s.gone)}", color = Color(0xFFFFD400), fontSize = 13.sp)
+            CheckButton("Take them off (pulled)", removeGone, Color(0xFFFFD400), { removeGone = !removeGone })
+        }
+        if (s.check.isNotEmpty()) {
+            Text("Check these: ${s.check.size} read only once or twice:\n${names(s.check)}", color = Color(0xFFCFD8DC), fontSize = 13.sp)
+            CheckButton("Count them too", keepCheck, Color(0xFF2ECC71), { keepCheck = !keepCheck })
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            PageButton("Save to back stock", {
+                state.sweep.finish(removeGone, keepCheck)
+                state.stock.setFromSweep(state.sweep.stockItems(state.catalog))
+                onSaved()
+            }, kind = Btn.ACCENT)
+            PageButton("Keep sweeping", onClose)
+        }
+        Text("Back stock will list ${state.sweep.countedCount() - (if (removeGone) s.gone.size else 0) + (if (keepCheck) s.check.size else 0)} cases.",
+            color = Color(0xFF93A4B0), fontSize = 12.sp)
     }
 }

@@ -10,8 +10,8 @@ android {
         applicationId = "com.frozenpull.scanner"
         minSdk = 28
         targetSdk = 34
-        versionCode = 17
-        versionName = "1.7"
+        versionCode = 18
+        versionName = "1.8"
         // Modern phones only; keeps the download about half the size.
         ndk { abiFilters += listOf("arm64-v8a") }
     }
@@ -46,6 +46,8 @@ dependencies {
     implementation("com.google.mlkit:text-recognition:16.0.1")
     // On-phone picture matching for retail packages (sales floor).
     implementation("com.google.mediapipe:tasks-vision:0.10.14")
+    // Shelf markers (4×4 ArUco).
+    implementation("org.opencv:opencv:4.10.0")
     implementation(platform("androidx.compose:compose-bom:2024.06.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")
