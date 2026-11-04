@@ -216,7 +216,7 @@ class LiveAnalyzer(private val state: AppState, private val out: MutableStateFlo
                     dets += Detection(-1, toScreen(r), raw, true, listOf(g), g.product, if (g.score >= 0.95f) Level.SURE else Level.GUESS)
                 }
             }
-            if (floor) pictureMatch(proxy, rot, crop, dets)
+            pictureMatch(proxy, rot, crop, dets)
             val now = SystemClock.elapsedRealtime()
             val boxes = tracker.update(dets.filter { it.box.right > 0 && it.box.left < 1 && it.box.bottom > 0 && it.box.top < 1 }, now)
             val took = (now - t0).toFloat()
@@ -233,8 +233,8 @@ class LiveAnalyzer(private val state: AppState, private val out: MutableStateFlo
     fun close() { textReader.close(); barcodeReader.close() }
 
     /**
-     * Retail packages: around text that couldn't be read for sure, cut out the package and
-     * compare it with the retail pictures. A few per frame, so the view stays live.
+     * Around text that couldn't be read for sure, cut out the package (floor) or case (walk-in)
+     * and compare it with the pictures of that kind. A few per frame, so the view stays live.
      */
     private fun pictureMatch(proxy: ImageProxy, rot: Int, crop: Rect, dets: MutableList<Detection>) {
         val retail = state.retail
@@ -245,17 +245,21 @@ class LiveAnalyzer(private val state: AppState, private val out: MutableStateFlo
         val frame = runCatching { proxy.toBitmap() }.getOrNull() ?: return
         val up = if (rot == 0) frame else Bitmap.createBitmap(frame, 0, 0, frame.width, frame.height, android.graphics.Matrix().apply { postRotate(rot.toFloat()) }, true)
         for ((i, d) in todo) {
-            // The package is bigger than its label: widen and heighten the box around the text.
+            // The package or case is bigger than its label: widen and heighten the box around the text.
             val cx = d.box.centerX(); val cy = d.box.centerY()
-            val w = max(d.box.width() * 2.2f, 0.08f); val h = max(d.box.height() * 4f, 0.12f)
+            val w = if (floor) max(d.box.width() * 2.2f, 0.08f) else max(d.box.width() * 2.6f, 0.12f)
+            val h = if (floor) max(d.box.height() * 4f, 0.12f) else max(d.box.height() * 5f, 0.16f)
             val r = RectF(cx - w / 2, cy - h * 0.45f, cx + w / 2, cy + h * 0.55f)
             val l = (crop.left + r.left.coerceIn(0f, 1f) * crop.width()).toInt().coerceIn(0, up.width - 1)
             val t = (crop.top + r.top.coerceIn(0f, 1f) * crop.height()).toInt().coerceIn(0, up.height - 1)
             val rr = (crop.left + r.right.coerceIn(0f, 1f) * crop.width()).toInt().coerceIn(l + 1, up.width)
             val bb = (crop.top + r.bottom.coerceIn(0f, 1f) * crop.height()).toInt().coerceIn(t + 1, up.height)
             if (rr - l < 48 || bb - t < 48) continue
-            val hit = runCatching { retail.match(Bitmap.createBitmap(up, l, t, rr - l, bb - t)) }.getOrNull() ?: continue
-            if (hit.score < 0.72f || hit.margin < 0.03f) continue
+            val kind = if (floor) PicKind.RETAIL else PicKind.CASE
+            val hit = runCatching { retail.match(Bitmap.createBitmap(up, l, t, rr - l, bb - t), kind) }.getOrNull() ?: continue
+            // Plain brown cases look alike, so the walk-in needs a clearer win than the floor.
+            if (floor && (hit.score < 0.72f || hit.margin < 0.03f)) continue
+            if (!floor && (hit.score < 0.8f || hit.margin < 0.05f)) continue
             // Text that clearly names something else wins over the picture.
             if (d.product != null && d.product.id != hit.product.id && (d.guesses.firstOrNull()?.score ?: 0f) >= 0.8f) continue
             val level = if (hit.score >= 0.85f && hit.margin >= 0.06f) Level.SURE else Level.GUESS
@@ -308,11 +312,12 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
     LaunchedEffect(floor) {
         analyzer.floor = floor
         analyzer.tracker.clear()
-        if (floor && !state.retail.ready) {
+        if (!state.retail.ready) {
             val job = launch(kotlinx.coroutines.Dispatchers.Default) { state.retail.prepare() }
             while (job.isActive) { retailStatus = state.retail.status; delay(250) }
+            delay(2500)
         }
-        retailStatus = if (floor) state.retail.status else ""
+        retailStatus = ""
     }
 
     LaunchedEffect(holdLong) { analyzer.tracker.holdMs = if (holdLong) 2000L else 700L }
@@ -396,7 +401,8 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
             LensPicker(plans, lens, onPick = { lensPick = it; frozen = null; analyzer.paused = false }, modifier = Modifier.align(Alignment.BottomStart).padding(10.dp))
             // Tapped box: name, where it goes, and pull-list marking.
             val sel = shown.firstOrNull { it.id == selected }
-            if (sel != null && (sel.product == null || teaching)) TeachCard(state, sel, analyzer.tracker,
+            if (sel != null && (sel.product == null || teaching)) TeachCard(state, sel, analyzer.tracker, if (floor) PicKind.RETAIL else PicKind.CASE,
+                grab = { frozen ?: previewView.bitmap },
                 onDone = { selected = null; teaching = false }, modifier = Modifier.align(Alignment.BottomEnd))
             else sel?.product?.let { p ->
                 val item = pullFor[p.id]
@@ -438,7 +444,7 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
                         }
                     } else Text("Not in today's stock list", color = Color(0xFFCFD8DC), fontSize = 13.sp)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (!sel.byPicture && sel.text.isNotBlank()) PageButton("Wrong name?", { teaching = true })
+                        PageButton("Wrong name?", { teaching = true })
                         PageButton("Close", { selected = null })
                     }
                 }
@@ -523,7 +529,8 @@ private fun LiveOverlay(boxes: List<LiveBox>, selected: Int?, floor: Boolean, ca
  * and it remembers that writing from then on, in the live view and in photo scans.
  */
 @Composable
-private fun TeachCard(state: AppState, box: LiveBox, tracker: LiveTracker, onDone: () -> Unit, modifier: Modifier) {
+private fun TeachCard(state: AppState, box: LiveBox, tracker: LiveTracker, kind: PicKind, grab: () -> Bitmap?, onDone: () -> Unit, modifier: Modifier) {
+    val scope = rememberCoroutineScope()
     var q by remember(box.id) { mutableStateOf("") }
     val read = box.text
     val picks = remember(box.id, q) {
@@ -533,6 +540,20 @@ private fun TeachCard(state: AppState, box: LiveBox, tracker: LiveTracker, onDon
     fun teach(p: Product) {
         if (read.isNotBlank()) { state.learned.teachWriting(read, p.id); state.matcher.rebuild() }
         tracker.relabel(box.id, p)
+        // Keep how this box looked, so picture matching learns your store's cases and packages.
+        val view = runCatching { grab() }.getOrNull()
+        if (view != null) {
+            val b = box.box
+            val padX = b.width() * 0.25f; val padY = b.height() * 0.25f
+            val l = ((b.left - padX).coerceIn(0f, 1f) * view.width).toInt()
+            val t = ((b.top - padY).coerceIn(0f, 1f) * view.height).toInt()
+            val r = ((b.right + padX).coerceIn(0f, 1f) * view.width).toInt().coerceAtLeast(l + 1)
+            val btm = ((b.bottom + padY).coerceIn(0f, 1f) * view.height).toInt().coerceAtLeast(t + 1)
+            if (r - l >= 32 && btm - t >= 32) {
+                val crop = Bitmap.createBitmap(view, l, t, (r - l).coerceAtMost(view.width - l), (btm - t).coerceAtMost(view.height - t))
+                scope.launch(kotlinx.coroutines.Dispatchers.Default) { state.retail.teach(crop, p, kind) }
+            }
+        }
         onDone()
     }
     Column(
