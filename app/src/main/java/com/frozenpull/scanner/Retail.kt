@@ -31,8 +31,9 @@ class Retail(private val context: Context, private val catalog: Catalog) {
         val files = runCatching { context.assets.list("retail")?.toList() }.getOrNull().orEmpty().filter { it.endsWith(".jpg") }.sorted()
         val m = HashMap<String, Product>()
         for (f in files) {
-            val s = f.removeSuffix(".jpg").trimStart('0')
-            catalog.products.firstOrNull { s in it.allSkus }?.let { m[f.removeSuffix(".jpg")] = it }
+            // Pictures are named by the last 5 digits of the SKU; some stickers add a digit in front.
+            val s = f.removeSuffix(".jpg").padStart(5, '0').takeLast(5)
+            catalog.products.firstOrNull { p -> p.allSkus.any { it.padStart(5, '0').takeLast(5) == s } }?.let { m[f.removeSuffix(".jpg")] = it }
         }
         bySku = m
         skus = files.map { it.removeSuffix(".jpg") }.filter { it in m }
