@@ -1,0 +1,55 @@
+name: Fetch retail pictures
+
+# Downloads the product photos from traderjoes.com (small thumbnails) and the on-phone
+# picture-matching model, and commits them into the app, so builds don't depend on the site.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - run: pip install --break-system-packages pillow
+      - name: Download thumbnails
+        run: |
+          mkdir -p app/src/main/assets/retail raw
+          ok=0; bad=0
+          while IFS=: read -r sku folder; do
+            [ -z "$sku" ] && continue
+            url="https://www.traderjoes.com/content/dam/trjo/products/m20${folder}/${sku}.png/jcr:content/renditions/cq5dam.thumbnail.319.319.png"
+            if curl -fsSL -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36" --retry 2 "$url" -o "raw/$sku.png"; then ok=$((ok+1)); else bad=$((bad+1)); echo "::warning::no picture for $sku"; fi
+            sleep 0.2
+          done < tools/retail.txt
+          echo "downloaded $ok, failed $bad"
+          python3 - <<'PY'
+          import glob, os
+          from PIL import Image
+          n = 0
+          for f in glob.glob('raw/*.png'):
+              try:
+                  im = Image.open(f).convert('RGBA')
+                  bg = Image.new('RGB', im.size, (255, 255, 255)); bg.paste(im, mask=im.split()[3])
+                  bg.thumbnail((256, 256))
+                  bg.save('app/src/main/assets/retail/' + os.path.basename(f)[:-4] + '.jpg', quality=82)
+                  n += 1
+              except Exception as e:
+                  print('bad', f, e)
+          print('saved', n)
+          PY
+          du -sh app/src/main/assets/retail
+      - name: Download the picture-matching model (MediaPipe, Apache 2.0)
+        run: |
+          mkdir -p app/src/main/assets/models
+          curl -fsSL https://storage.googleapis.com/mediapipe-models/image_embedder/mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite -o app/src/main/assets/models/embedder.tflite
+          ls -la app/src/main/assets/models
+      - name: Commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add app/src/main/assets/retail app/src/main/assets/models
+          git commit -m "Retail pictures from traderjoes.com and the picture-matching model" || echo "nothing new"
+          git push
