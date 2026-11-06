@@ -24,8 +24,33 @@ private const val LINK_AFTER = 3         // co-sightings before a marker joins i
 
 val WALLS = listOf("Left shelf", "Back wall", "Right shelf", "Front wall")
 val ROWS = listOf("Top", "Middle", "Bottom", "Floor")
-/** Which part of a row a marker marks. "" = the whole row. */
-val PARTS = listOf("Left", "Middle", "Right", "")
+/** Which part of a row a marker marks: sections 1–6 along a shelf (1 = door end), left/right on the end walls. "" = whole row. */
+val SHELF_PARTS = listOf("1", "2", "3", "4", "5", "6")
+val WALL_PARTS = listOf("Left", "Right", "")
+fun partsFor(wall: String) = if (wall.endsWith("shelf")) SHELF_PARTS else WALL_PARTS
+/** "3" -> "section 3", "Left" -> "left". */
+fun partLabel(part: String) = if (part.toIntOrNull() != null) "section $part" else part.lowercase()
+
+/**
+ * The printed layout (walkin-markers-4x4.pdf, numbers 1–40): six per shelf row, numbered from the
+ * door end, so the app knows each marker's spot without setup. Returns (wall, row, part).
+ *   1–18  Left shelf: top 1–6, middle 7–12, bottom 13–18
+ *   19–36 Right shelf: top, middle, bottom the same way
+ *   37–38 Back wall left, right · 39–40 Front wall left, right
+ */
+fun plannedSpot(id: Int): Triple<String, String, String>? {
+    val n = id + 1
+    return when (n) {
+        in 1..36 -> {
+            val wall = if (n <= 18) "Left shelf" else "Right shelf"
+            val k = (n - 1) % 18
+            Triple(wall, listOf("Top", "Middle", "Bottom")[k / 6], "${k % 6 + 1}")
+        }
+        37 -> Triple("Back wall", "", "Left"); 38 -> Triple("Back wall", "", "Right")
+        39 -> Triple("Front wall", "", "Left"); 40 -> Triple("Front wall", "", "Right")
+        else -> null
+    }
+}
 
 /** A marker seen in one frame: its id and four corners in screen pixels (upright, on-screen crop). */
 class SeenMarker(val id: Int, val corners: FloatArray) {
@@ -232,6 +257,8 @@ class SweepStore(context: Context) {
      */
     @Synchronized
     fun update(seen: List<SeenMarker>, labels: List<LabelSeen>, now: Long, dtMs: Long, screenW: Float, screenH: Float): Pair<List<PinView>, List<MarkerView>> {
+        // Markers from the printed sheet set themselves up the first time they're seen (tap one to change it).
+        for (s in seen) if (markers[s.id] == null) plannedSpot(s.id)?.let { (w, r, p) -> setMarker(s.id, w, r, p) }
         val known = seen.filter { markers[it.id] != null }
         // Screen -> wall map for each wall in view: fitted over all its markers in view when there are
         // two or more (steady across the whole picture), from the one marker otherwise.

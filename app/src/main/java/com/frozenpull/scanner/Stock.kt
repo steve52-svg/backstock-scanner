@@ -191,7 +191,7 @@ class StockStore(context: Context) {
         return "Pull $n of ${it.cases} · " + listOfNotNull(if (p > 0) "$p partial" else null, if (f > 0) "$f full" else null).joinToString(", ")
     }
 
-    fun place(it: StockItem): String = listOf(it.shelf, if (it.row.isNotBlank()) "${it.row.lowercase()} row" else "", it.spot.lowercase()).filter { s -> s.isNotBlank() }.joinToString(" · ")
+    fun place(it: StockItem): String = listOf(it.shelf, if (it.row.isNotBlank()) "${it.row.lowercase()} row" else "", partLabel(it.spot)).filter { s -> s.isNotBlank() }.joinToString(" · ")
     fun overflow(it: StockItem): String = if (it.usual.isNotBlank() && it.shelf.isNotBlank() && it.usual != it.shelf) "overflow, usually ${it.usual.lowercase()}" else ""
 
     /** For the page's "Paste results from app": ✓ pulled, ✗ can't find, ☐ still to pull. */
@@ -217,7 +217,7 @@ class StockStore(context: Context) {
             { rowOrder.indexOf(it.row).let { i -> if (i < 0) 3 else i } }, { it.pos }))
         val out = mutableListOf<Pair<String, MutableList<StockItem>>>()
         for (it in sorted) {
-            val k = if (it.shelf.isNotBlank()) it.shelf + (if (it.row.isNotBlank()) " · ${it.row.lowercase()} row" else "") + (if (it.spot.isNotBlank()) " · ${it.spot.lowercase()}" else "") else it.group.ifBlank { "Other" }
+            val k = if (it.shelf.isNotBlank()) it.shelf + (if (it.row.isNotBlank()) " · ${it.row.lowercase()} row" else "") + (if (it.spot.isNotBlank()) " · ${partLabel(it.spot)}" else "") else it.group.ifBlank { "Other" }
             if (out.isEmpty() || out.last().first != k) out += k to mutableListOf()
             out.last().second += it
         }
