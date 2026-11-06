@@ -186,6 +186,9 @@ class SweepStore(context: Context) {
     private val file = File(context.filesDir, "sweep.json")
     val markers = HashMap<Int, MarkerInfo>()
     val cases = mutableListOf<CaseRec>()
+    /** Goes up whenever the counted cases change, so the back-stock list can follow live. */
+    @Volatile var version = 0L
+        private set
     @Volatile var sweeping = false
         private set
     private var sweepStart = 0L
@@ -271,7 +274,7 @@ class SweepStore(context: Context) {
                 // Same case read again: settle its position, count the read once per frame.
                 val n = same.reads.coerceAtMost(20).toFloat()
                 same.x = (same.x * n + wx) / (n + 1); same.y = (same.y * n + wy) / (n + 1)
-                if (same.lastSeen != now) same.reads++
+                if (same.lastSeen != now) { same.reads++; if (same.reads == COUNT_AFTER) version++ }
                 same.lastSeen = now; same.seenThisSweep = true; same.row = row
             } else {
                 cases += CaseRec("c${nextCase++}", pid, wall, row, wx, wy).also { it.reads = 1; it.firstSeen = now; it.lastSeen = now; it.seenThisSweep = true }
@@ -342,20 +345,20 @@ class SweepStore(context: Context) {
         val s = summary()
         if (removeGone) cases.removeAll(s.gone.toSet())
         if (keepCheck) s.check.forEach { it.reads = COUNT_AFTER } else cases.removeAll(s.check.toSet())
-        sweeping = false; save()
+        sweeping = false; version++; save()
     }
 
     @Synchronized
     fun cancelSweep() { val s = summary(); cases.removeAll(s.check.toSet()); sweeping = false; save() }
 
     @Synchronized
-    fun setPartial(caseId: String, partial: Boolean) { cases.firstOrNull { it.id == caseId }?.partial = partial; save() }
+    fun setPartial(caseId: String, partial: Boolean) { cases.firstOrNull { it.id == caseId }?.partial = partial; version++; save() }
 
     @Synchronized
-    fun relabel(caseId: String, productId: String) { cases.firstOrNull { it.id == caseId }?.let { it.productId = productId; it.reads = COUNT_AFTER }; save() }
+    fun relabel(caseId: String, productId: String) { cases.firstOrNull { it.id == caseId }?.let { it.productId = productId; it.reads = COUNT_AFTER }; version++; save() }
 
     @Synchronized
-    fun removeCase(caseId: String) { cases.removeAll { it.id == caseId }; save() }
+    fun removeCase(caseId: String) { cases.removeAll { it.id == caseId }; version++; save() }
 
     @Synchronized
     fun clearCases() { cases.clear(); save() }

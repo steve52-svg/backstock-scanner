@@ -367,7 +367,18 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
     var sweeping by remember { mutableStateOf(state.sweep.sweeping) }
     var counts by remember { mutableStateOf(Triple(0, 0, 0)) }
     val sweep = state.sweep
-    LaunchedEffect(Unit) { while (true) { counts = Triple(sweep.setCount(), sweep.linkedCount(), sweep.countedCount()); delay(1000) } }
+    // Counting is always on in the walk-in, and the back-stock list follows along live:
+    // no need to tap Finish (that's only for checking what's gone).
+    LaunchedEffect(floor) { if (!floor && !sweep.sweeping) { sweep.startSweep(SystemClock.elapsedRealtime()); sweeping = true } }
+    LaunchedEffect(Unit) {
+        var applied = -1L
+        while (true) {
+            counts = Triple(sweep.setCount(), sweep.linkedCount(), sweep.countedCount())
+            val v = sweep.version
+            if (v != applied) { applied = v; state.stock.setFromSweep(sweep.stockItems(state.catalog)); sweep.save() }
+            delay(1500)
+        }
+    }
     val liveNow by rememberUpdatedState(live)
     var retailStatus by remember { mutableStateOf("") }
 
@@ -483,7 +494,7 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
                 PinCard(state, cid, onDone = { pinSel = null }, modifier = Modifier.align(Alignment.BottomEnd))
             }
             summary?.let { sm ->
-                SummaryCard(state, sm, onSaved = { summary = null; sweeping = false }, onClose = { summary = null }, modifier = Modifier.align(Alignment.Center))
+                SummaryCard(state, sm, onSaved = { summary = null; sweep.startSweep(SystemClock.elapsedRealtime()); sweeping = true }, onClose = { summary = null }, modifier = Modifier.align(Alignment.Center))
             }
             val sel = shown.firstOrNull { it.id == selected }
             if (sel != null && (sel.product == null || teaching)) TeachCard(state, sel, analyzer.tracker, if (floor) PicKind.RETAIL else PicKind.CASE,
@@ -544,9 +555,8 @@ fun LiveScreen(state: AppState, onBack: () -> Unit) {
             Text("Test version · nothing is uploaded", style = Type.small, color = Muted)
             Seg(listOf("Walk-in", "Floor"), if (floor) 1 else 0) { floor = it == 1; selected = null; markerSel = null; pinSel = null }
             if (!floor) {
-                if (!sweeping) PageButton("Start sweep", { sweep.startSweep(SystemClock.elapsedRealtime()); sweeping = true }, kind = Btn.DARK, modifier = Modifier.fillMaxWidth())
-                else PageButton("Finish sweep", { summary = sweep.summary() }, kind = Btn.DARK, modifier = Modifier.fillMaxWidth())
-                Text("Markers ${counts.first} set · ${counts.second} linked\n${counts.third} cases counted" + if (sweeping) "\nSweeping…" else "",
+                PageButton("Check what's gone", { summary = sweep.summary() }, kind = Btn.DARK, modifier = Modifier.fillMaxWidth())
+                Text("Markers ${counts.first} set · ${counts.second} linked\n${counts.third} cases counted" + if (sweeping) "\nCounting live" else "",
                     style = Type.small, color = Muted)
             }
             PageButton(if (frozen == null) "Pause" else "Resume", {
@@ -790,7 +800,7 @@ private fun SummaryCard(state: AppState, s: SweepSummary, onSaved: () -> Unit, o
             .verticalScroll(rememberScrollState()).padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text("Sweep done", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text("What's gone? Since this sweep started", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
         Text("New this sweep: ${s.added.size} cases" + if (s.added.isNotEmpty()) "\n${names(s.added)}" else "", color = Color(0xFFCFD8DC), fontSize = 13.sp)
         if (s.gone.isNotEmpty()) {
             Text("Gone? ${s.gone.size} cases were in view but not seen:\n${names(s.gone)}", color = Color(0xFFFFD400), fontSize = 13.sp)
@@ -801,7 +811,7 @@ private fun SummaryCard(state: AppState, s: SweepSummary, onSaved: () -> Unit, o
             CheckButton("Count them too", keepCheck, Color(0xFF2ECC71), { keepCheck = !keepCheck })
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PageButton("Save to back stock", {
+            PageButton("Apply", {
                 state.sweep.finish(removeGone, keepCheck)
                 state.stock.setFromSweep(state.sweep.stockItems(state.catalog))
                 onSaved()
