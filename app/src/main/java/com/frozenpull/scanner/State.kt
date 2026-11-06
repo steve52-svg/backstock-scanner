@@ -73,11 +73,10 @@ class AppState(private val context: Context) {
     fun productFor(it: StockItem): Product? =
         catalog[it.id] ?: matcher.guessText(it.name, 1).firstOrNull()?.takeIf { g -> g.score >= 0.85f }?.product
 
-    private val prefs = context.getSharedPreferences("pull-list", Context.MODE_PRIVATE)
     /** Pull list: show the retail and case pictures next to each item. */
     var showPictures: Boolean
-        get() = prefs.getBoolean("pictures", true)
-        set(v) { prefs.edit().putBoolean("pictures", v).apply() }
+        get() = context.getSharedPreferences("pull-list", Context.MODE_PRIVATE).getBoolean("pictures", true)
+        set(v) { context.getSharedPreferences("pull-list", Context.MODE_PRIVATE).edit().putBoolean("pictures", v).apply() }
     val found = Found(context)
     val photos = mutableStateListOf<ScanPhoto>()
     /** Today's stock list and pull list (filled from the pull list page). */
