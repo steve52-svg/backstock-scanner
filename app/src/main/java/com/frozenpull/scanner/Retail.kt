@@ -65,6 +65,21 @@ class Retail(private val context: Context, private val catalog: Catalog) {
         return load(r)
     }
 
+    private val thumbs = android.util.LruCache<String, Bitmap>(120)
+
+    /**
+     * The picture of a product of one kind: what the retail package looks like, or what its case
+     * looks like in the walk-in. Your own saved pictures come first. Null if there isn't one.
+     */
+    fun picture(p: Product, kind: PicKind): Bitmap? {
+        val r = synchronized(this) {
+            refs.lastOrNull { it.product.id == p.id && it.kind == kind && it.file != null }
+                ?: refs.firstOrNull { it.product.id == p.id && it.kind == kind }
+        } ?: return null
+        thumbs.get(r.key)?.let { return it }
+        return load(r)?.also { thumbs.put(r.key, it) }
+    }
+
     private fun load(r: Ref): Bitmap? = runCatching {
         if (r.asset != null) context.assets.open(r.asset).use { BitmapFactory.decodeStream(it) } else BitmapFactory.decodeFile(r.file!!.path)
     }.getOrNull()

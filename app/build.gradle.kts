@@ -10,8 +10,8 @@ android {
         applicationId = "com.frozenpull.scanner"
         minSdk = 28
         targetSdk = 34
-        versionCode = 19
-        versionName = "1.9"
+        versionCode = 20
+        versionName = "2.0"
         // Modern phones only; keeps the download about half the size.
         ndk { abiFilters += listOf("arm64-v8a") }
     }

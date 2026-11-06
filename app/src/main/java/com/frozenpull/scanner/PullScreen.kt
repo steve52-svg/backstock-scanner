@@ -21,6 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -67,6 +70,7 @@ fun PullScreen(state: AppState, onBack: () -> Unit, onHandsFree: () -> Unit) {
     var note by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf(false) }
     var sheetMenu by remember { mutableStateOf(false) }
+    var pics by remember { mutableStateOf(state.showPictures) }
 
     // This screen reads like the page, so it can turn upright; the cameras stay sideways.
     DisposableEffect(Unit) {
@@ -135,6 +139,7 @@ fun PullScreen(state: AppState, onBack: () -> Unit, onHandsFree: () -> Unit) {
                                 })
                             }
                         }
+                        PageButton(if (pics) "Pictures: on" else "Pictures: off", { pics = !pics; state.showPictures = pics })
                         PageButton("Start new day", { confirm = true })
                     }
                     if (note.isNotBlank()) Text(note, style = Type.body, color = t.accent)
@@ -164,7 +169,7 @@ fun PullScreen(state: AppState, onBack: () -> Unit, onHandsFree: () -> Unit) {
                         Column(Modifier.fillMaxWidth().card(t)) {
                             list.forEachIndexed { i, it ->
                                 if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(t.line))
-                                StockRow(stock, it)
+                                StockRow(state, stock, it, pics)
                             }
                         }
                     }
@@ -179,7 +184,7 @@ fun PullScreen(state: AppState, onBack: () -> Unit, onHandsFree: () -> Unit) {
                         Column(Modifier.padding(top = 14.dp).fillMaxWidth().card(t)) {
                             pull.forEachIndexed { i, it ->
                                 if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(t.line))
-                                PullRow(stock, it)
+                                PullRow(state, stock, it, pics)
                             }
                         }
                     }
@@ -212,7 +217,7 @@ private fun ItemInfo(stock: StockStore, it: StockItem, tag: String, struck: Bool
 }
 
 @Composable
-private fun StockRow(stock: StockStore, it: StockItem) {
+private fun StockRow(state: AppState, stock: StockStore, it: StockItem, pics: Boolean) {
     val t = T
     val m = stock.marks[it.id]
     val need = stock.isNeed(it.id)
@@ -220,6 +225,7 @@ private fun StockRow(stock: StockStore, it: StockItem) {
         Modifier.fillMaxWidth().background(when { need -> t.accentSoft; m == "skip" -> t.skipSoft; else -> Color.Transparent }).padding(10.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        if (pics) Pictures(state, it)
         Column(Modifier.weight(1f)) {
             ItemInfo(stock, it, stock.caseText(it), struck = m == "skip", modifier = Modifier)
             if (need && it.cases > 1) QtyStepper(stock.qtyOf(it), it.cases) { n -> stock.setQty(it, n) }
@@ -232,7 +238,7 @@ private fun StockRow(stock: StockStore, it: StockItem) {
 }
 
 @Composable
-private fun PullRow(stock: StockStore, it: StockItem) {
+private fun PullRow(state: AppState, stock: StockStore, it: StockItem, pics: Boolean) {
     val t = T
     val m = stock.marks[it.id]
     var lastTap by remember { mutableLongStateOf(0L) }
@@ -245,6 +251,7 @@ private fun PullRow(stock: StockStore, it: StockItem) {
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        if (pics) Pictures(state, it)
         Column(Modifier.weight(1f).alpha(if (m == "pulled") 0.62f else 1f)) {
             ItemInfo(stock, it, stock.pullText(it), struck = m == "pulled", modifier = Modifier)
             if (it.cases > 1) QtyStepper(stock.qtyOf(it), it.cases) { n -> stock.setQty(it, n) }
@@ -256,6 +263,31 @@ private fun PullRow(stock: StockStore, it: StockItem) {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text("▲", style = Type.button, color = t.muted, modifier = Modifier.clickable { stock.move(it.id, -1) }.padding(8.dp))
             Text("▼", style = Type.button, color = t.muted, modifier = Modifier.clickable { stock.move(it.id, 1) }.padding(8.dp))
+        }
+    }
+}
+
+
+/** The case (as it looks in the walk-in) and the retail package, when the app has pictures of them. */
+@Composable
+private fun Pictures(state: AppState, it: StockItem) {
+    val t = T
+    val shots = remember(it.id, it.name) {
+        val p = state.productFor(it)
+        if (p == null) emptyList() else listOfNotNull(
+            state.retail.picture(p, PicKind.CASE)?.let { b -> "Box" to b },
+            state.retail.picture(p, PicKind.RETAIL)?.let { b -> "Retail" to b },
+        )
+    }
+    if (shots.isEmpty()) return
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        shots.forEach { (label, b) ->
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                androidx.compose.foundation.Image(b.asImageBitmap(), "$label picture of ${it.name}",
+                    Modifier.size(64.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(6.dp)).background(Color.White),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+                Text(label, style = Type.small, color = t.muted)
+            }
         }
     }
 }
