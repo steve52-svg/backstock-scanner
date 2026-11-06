@@ -24,6 +24,8 @@ private const val LINK_AFTER = 3         // co-sightings before a marker joins i
 
 val WALLS = listOf("Left shelf", "Back wall", "Right shelf", "Front wall")
 val ROWS = listOf("Top", "Middle", "Bottom", "Floor")
+/** Which part of a row a marker marks. "" = the whole row. */
+val PARTS = listOf("Left", "Middle", "Right", "")
 
 /** A marker seen in one frame: its id and four corners in screen pixels (upright, on-screen crop). */
 class SeenMarker(val id: Int, val corners: FloatArray) {
@@ -156,7 +158,7 @@ object Homography {
 }
 
 /** A marker you've set up: which wall and row it's on, and where it sits on that wall's map. */
-class MarkerInfo(val id: Int, var wall: String, var row: String) {
+class MarkerInfo(val id: Int, var wall: String, var row: String, var part: String = "") {
     var ox = 0f; var oy = 0f
     var linkN = 0
     var linked = false
@@ -164,6 +166,7 @@ class MarkerInfo(val id: Int, var wall: String, var row: String) {
 
 /** One counted (or about to be counted) case. Position is in centimetres on its wall's map. */
 class CaseRec(val id: String, var productId: String, val wall: String, var row: String, var x: Float, var y: Float) {
+    var part = ""
     var reads = 0
     var partial = false
     var firstSeen = 0L
@@ -200,11 +203,11 @@ class SweepStore(context: Context) {
 
     // ---------- setup ----------
     @Synchronized
-    fun setMarker(id: Int, wall: String, row: String) {
+    fun setMarker(id: Int, wall: String, row: String, part: String) {
         val m = markers[id]
-        if (m != null && m.wall == wall) { m.row = row }
+        if (m != null && m.wall == wall) { m.row = row; m.part = part }
         else {
-            markers[id] = MarkerInfo(id, wall, row).also { nm ->
+            markers[id] = MarkerInfo(id, wall, row, part).also { nm ->
                 // The first marker on a wall starts that wall's map.
                 if (markers.values.none { it.id != id && it.wall == wall && it.linked }) { nm.linked = true; nm.linkN = LINK_AFTER }
             }
@@ -267,7 +270,8 @@ class SweepStore(context: Context) {
             val pid = l.productId ?: continue
             if (!l.sure) continue
             val (wall, wx, wy) = placeOnWall(maps, linkedByWall, l.x, l.y) ?: continue
-            val row = rowFor(wall, wx, wy) ?: continue
+            val home = markerFor(wall, wx, wy) ?: continue
+            val row = home.row
             val near = cases.filter { it.wall == wall && hypot(it.x - wx, it.y - wy) < SAME_CASE_CM }
             val same = near.filter { it.productId == pid }.minByOrNull { hypot(it.x - wx, it.y - wy) }
             if (same != null) {
@@ -275,9 +279,9 @@ class SweepStore(context: Context) {
                 val n = same.reads.coerceAtMost(20).toFloat()
                 same.x = (same.x * n + wx) / (n + 1); same.y = (same.y * n + wy) / (n + 1)
                 if (same.lastSeen != now) { same.reads++; if (same.reads == COUNT_AFTER) version++ }
-                same.lastSeen = now; same.seenThisSweep = true; same.row = row
+                same.lastSeen = now; same.seenThisSweep = true; same.row = row; same.part = home.part
             } else {
-                cases += CaseRec("c${nextCase++}", pid, wall, row, wx, wy).also { it.reads = 1; it.firstSeen = now; it.lastSeen = now; it.seenThisSweep = true }
+                cases += CaseRec("c${nextCase++}", pid, wall, row, wx, wy).also { it.part = home.part; it.reads = 1; it.firstSeen = now; it.lastSeen = now; it.seenThisSweep = true }
             }
         }
 
@@ -316,11 +320,14 @@ class SweepStore(context: Context) {
         return best
     }
 
-    /** Row of a wall position: the row of the highest marker that sits below it. */
-    private fun rowFor(wall: String, x: Float, y: Float): String? {
+    /** The marker a wall position belongs to: the nearest one on the shelf just below it (its row and part). */
+    private fun markerFor(wall: String, x: Float, y: Float): MarkerInfo? {
         val below = markers.values.filter { it.wall == wall && it.linked && it.oy <= y + 5f && it.row != "Floor" }
-        return (below.minByOrNull { (y - it.oy) + abs(x - it.ox) * 0.3f } ?: markers.values.filter { it.wall == wall && it.linked }
-            .minByOrNull { hypot(it.ox - x, it.oy - y) })?.row
+        val shelfY = below.maxOfOrNull { it.oy }
+        // Markers on the same shelf as the nearest one below; of those, the closest along the shelf.
+        val sameShelf = if (shelfY == null) emptyList() else below.filter { abs(it.oy - shelfY) < 15f && y - it.oy < 70f }
+        return sameShelf.minByOrNull { abs(x - it.ox) }
+            ?: markers.values.filter { it.wall == wall && it.linked }.minByOrNull { hypot(it.ox - x, it.oy - y) }
     }
 
     // ---------- sweeps ----------
@@ -368,8 +375,8 @@ class SweepStore(context: Context) {
     fun stockItems(catalog: Catalog): List<StockItem> =
         cases.filter { it.counted }.groupBy { it.productId }.mapNotNull { (pid, cs) ->
             val p = catalog[pid] ?: return@mapNotNull null
-            val where = cs.groupBy { it.wall to it.row }.maxByOrNull { it.value.size }!!.key
-            StockItem(pid, p.name, p.section, where.first, where.second, cs.map { it.x.toDouble() }.average(), cs.size, cs.count { it.partial },
+            val where = cs.groupBy { Triple(it.wall, it.row, it.part) }.maxByOrNull { it.value.size }!!.key
+            StockItem(pid, p.name, p.section, where.first, where.second, cs.map { it.x.toDouble() }.average(), cs.size, cs.count { it.partial }, spot = where.third,
                 usual = if (p.shelf.isNotBlank() && p.shelf != where.first) p.shelf else "")
         }
 
@@ -382,7 +389,7 @@ class SweepStore(context: Context) {
             o.optJSONArray("markers")?.let { a ->
                 for (i in 0 until a.length()) {
                     val m = a.getJSONObject(i)
-                    markers[m.getInt("id")] = MarkerInfo(m.getInt("id"), m.getString("wall"), m.optString("row")).also {
+                    markers[m.getInt("id")] = MarkerInfo(m.getInt("id"), m.getString("wall"), m.optString("row"), m.optString("part")).also {
                         it.ox = m.optDouble("ox", 0.0).toFloat(); it.oy = m.optDouble("oy", 0.0).toFloat()
                         it.linkN = m.optInt("n", 0); it.linked = m.optBoolean("linked", false)
                     }
@@ -393,7 +400,7 @@ class SweepStore(context: Context) {
                     val c = a.getJSONObject(i)
                     cases += CaseRec(c.getString("id"), c.getString("p"), c.getString("wall"), c.optString("row"),
                         c.getDouble("x").toFloat(), c.getDouble("y").toFloat()).also {
-                        it.reads = c.optInt("reads", COUNT_AFTER); it.partial = c.optBoolean("partial"); it.firstSeen = c.optLong("first"); it.lastSeen = c.optLong("last")
+                        it.part = c.optString("part"); it.reads = c.optInt("reads", COUNT_AFTER); it.partial = c.optBoolean("partial"); it.firstSeen = c.optLong("first"); it.lastSeen = c.optLong("last")
                     }
                 }
             }
@@ -404,10 +411,10 @@ class SweepStore(context: Context) {
     fun save() {
         runCatching {
             val ma = JSONArray()
-            markers.values.forEach { ma.put(JSONObject().put("id", it.id).put("wall", it.wall).put("row", it.row).put("ox", it.ox.toDouble()).put("oy", it.oy.toDouble()).put("n", it.linkN).put("linked", it.linked)) }
+            markers.values.forEach { ma.put(JSONObject().put("id", it.id).put("wall", it.wall).put("row", it.row).put("part", it.part).put("ox", it.ox.toDouble()).put("oy", it.oy.toDouble()).put("n", it.linkN).put("linked", it.linked)) }
             val ca = JSONArray()
             cases.filter { it.counted || sweeping }.forEach {
-                ca.put(JSONObject().put("id", it.id).put("p", it.productId).put("wall", it.wall).put("row", it.row).put("x", it.x.toDouble()).put("y", it.y.toDouble())
+                ca.put(JSONObject().put("id", it.id).put("p", it.productId).put("wall", it.wall).put("row", it.row).put("part", it.part).put("x", it.x.toDouble()).put("y", it.y.toDouble())
                     .put("reads", it.reads).put("partial", it.partial).put("first", it.firstSeen).put("last", it.lastSeen))
             }
             file.writeText(JSONObject().put("next", nextCase).put("markers", ma).put("cases", ca).toString())

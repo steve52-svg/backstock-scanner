@@ -732,6 +732,7 @@ private fun MarkerCard(state: AppState, id: Int, onDone: () -> Unit, modifier: M
     val info = state.sweep.marker(id)
     var wall by remember(id) { mutableStateOf(info?.wall ?: WALLS[0]) }
     var row by remember(id) { mutableStateOf(info?.row ?: ROWS[0]) }
+    var part by remember(id) { mutableStateOf(info?.part ?: "") }
     Column(
         modifier.padding(10.dp).width(340.dp).background(Color.Black.copy(alpha = 0.88f), RoundedCornerShape(10.dp)).padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -741,9 +742,10 @@ private fun MarkerCard(state: AppState, id: Int, onDone: () -> Unit, modifier: M
             color = Color(0xFFCFD8DC), fontSize = 13.sp)
         Seg(WALLS.map { it.replace(" shelf", "") }, WALLS.indexOf(wall)) { wall = WALLS[it] }
         Seg(ROWS, ROWS.indexOf(row)) { row = ROWS[it] }
-        Text("Row = the shelf this marker's lip holds up.", color = Color(0xFF93A4B0), fontSize = 12.sp)
+        Seg(PARTS.map { it.ifBlank { "Whole row" } }, PARTS.indexOf(part).coerceAtLeast(0)) { part = PARTS[it] }
+        Text("Row = the shelf this marker's lip holds up. Left, middle or right = which part of that shelf it marks.", color = Color(0xFF93A4B0), fontSize = 12.sp)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PageButton("Save", { state.sweep.setMarker(id, wall, row); onDone() }, kind = Btn.ACCENT)
+            PageButton("Save", { state.sweep.setMarker(id, wall, row, part); onDone() }, kind = Btn.ACCENT)
             if (info != null) PageButton("Forget", { state.sweep.forgetMarker(id); onDone() }, kind = Btn.DANGER)
             PageButton("Cancel", onDone)
         }
@@ -763,7 +765,7 @@ private fun PinCard(state: AppState, caseId: String, onDone: () -> Unit, modifie
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(p?.name ?: c.productId, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-        Text("${c.wall} · ${c.row.lowercase()} row · read ${c.reads}×" + if (!c.counted) " (not counted yet)" else "", color = Color(0xFFCFD8DC), fontSize = 13.sp)
+        Text("${c.wall} · ${c.row.lowercase()} row" + (if (c.part.isNotBlank()) " · ${c.part.lowercase()}" else "") + " · read ${c.reads}×" + if (!c.counted) " (not counted yet)" else "", color = Color(0xFFCFD8DC), fontSize = 13.sp)
         if (!picking) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PageButton(if (c.partial) "Partial ✓" else "Mark partial", { state.sweep.setPartial(caseId, !c.partial); onDone() })

@@ -93,7 +93,7 @@ object Holder {
     fun get(ctx: Context): AppState = state ?: AppState(ctx).also { state = it }
 }
 
-const val APP_VERSION = "2.0"
+const val APP_VERSION = "2.1"
 
 val Sure = Color(0xFF2ECC71)
 val Maybe = Color(0xFFF5B041)

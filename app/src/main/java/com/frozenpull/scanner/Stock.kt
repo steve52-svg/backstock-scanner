@@ -23,6 +23,8 @@ data class StockItem(
     val partial: Int,
     /** Where it usually lives (from the box library), to flag overflow. */
     val usual: String = "",
+    /** Which part of the row: Left, Middle or Right (from the shelf markers). */
+    val spot: String = "",
 )
 
 /**
@@ -65,7 +67,7 @@ class StockStore(context: Context) {
         val a = JSONArray()
         items.forEach {
             a.put(JSONObject().put("id", it.id).put("name", it.name).put("group", it.group).put("shelf", it.shelf).put("row", it.row)
-                .put("pos", it.pos).put("cases", it.cases).put("partial", it.partial).put("usual", it.usual))
+                .put("pos", it.pos).put("cases", it.cases).put("partial", it.partial).put("usual", it.usual).put("spot", it.spot))
         }
         file.writeText(JSONObject().put("date", date).put("updated", updated).put("lastImport", lastImport).put("items", a)
             .put("marks", JSONObject(marks.toMap() as Map<*, *>)).put("qty", JSONObject(qty.toMap() as Map<*, *>))
@@ -80,7 +82,7 @@ class StockStore(context: Context) {
             items += StockItem(
                 id = x.getString("id"), name = x.getString("name"), group = x.optString("group"),
                 shelf = x.optString("shelf"), row = x.optString("row"), pos = x.optDouble("pos", 99.0),
-                cases = x.optInt("cases", 1).coerceAtLeast(1), partial = x.optInt("partial", 0), usual = x.optString("usual"),
+                cases = x.optInt("cases", 1).coerceAtLeast(1), partial = x.optInt("partial", 0), usual = x.optString("usual"), spot = x.optString("spot"),
             )
         }
     }
@@ -189,7 +191,7 @@ class StockStore(context: Context) {
         return "Pull $n of ${it.cases} · " + listOfNotNull(if (p > 0) "$p partial" else null, if (f > 0) "$f full" else null).joinToString(", ")
     }
 
-    fun place(it: StockItem): String = listOf(it.shelf, if (it.row.isNotBlank()) "${it.row.lowercase()} row" else "").filter { s -> s.isNotBlank() }.joinToString(" · ")
+    fun place(it: StockItem): String = listOf(it.shelf, if (it.row.isNotBlank()) "${it.row.lowercase()} row" else "", it.spot.lowercase()).filter { s -> s.isNotBlank() }.joinToString(" · ")
     fun overflow(it: StockItem): String = if (it.usual.isNotBlank() && it.shelf.isNotBlank() && it.usual != it.shelf) "overflow, usually ${it.usual.lowercase()}" else ""
 
     /** For the page's "Paste results from app": ✓ pulled, ✗ can't find, ☐ still to pull. */
@@ -215,7 +217,7 @@ class StockStore(context: Context) {
             { rowOrder.indexOf(it.row).let { i -> if (i < 0) 3 else i } }, { it.pos }))
         val out = mutableListOf<Pair<String, MutableList<StockItem>>>()
         for (it in sorted) {
-            val k = if (it.shelf.isNotBlank()) it.shelf + (if (it.row.isNotBlank()) " · ${it.row.lowercase()} row" else "") else it.group.ifBlank { "Other" }
+            val k = if (it.shelf.isNotBlank()) it.shelf + (if (it.row.isNotBlank()) " · ${it.row.lowercase()} row" else "") + (if (it.spot.isNotBlank()) " · ${it.spot.lowercase()}" else "") else it.group.ifBlank { "Other" }
             if (out.isEmpty() || out.last().first != k) out += k to mutableListOf()
             out.last().second += it
         }
